@@ -109,20 +109,7 @@ fun HomeScreen(
             }
         }
 
-        if (!isTracking) {
-            FloatingActionButton(
-                onClick = onCreateRoute,
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(24.dp)
-                    .shadow(12.dp, CircleShape),
-                containerColor = Violet700,
-                contentColor = Color.White,
-                shape = CircleShape,
-            ) {
-                Icon(Icons.Default.Add, "Créer une ligne", modifier = Modifier.size(28.dp))
-            }
-        }
+
     }
 }
 
@@ -368,12 +355,7 @@ private fun RouteCard(
                         Icon(Icons.Default.PlayArrow, "Démarrer", tint = Color.White, modifier = Modifier.size(20.dp))
                     }
                 }
-                IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, "Modifier", tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                IconButton(onClick = { showConfirmDelete = true }) {
-                    Icon(Icons.Default.Delete, "Supprimer", tint = DangerRed.copy(alpha = 0.7f))
-                }
+
             }
         }
     }

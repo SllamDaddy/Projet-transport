@@ -57,7 +57,6 @@ fun TrackingScreen(
     val trackingState by viewModel.trackingState.collectAsStateWithLifecycle()
     val activeRoute by viewModel.activeRoute.collectAsStateWithLifecycle()
     val currentLocation by viewModel.currentLocation.collectAsStateWithLifecycle()
-    val tariffs by viewModel.tariffs.collectAsStateWithLifecycle()
     val driverAgent by viewModel.driverAgent.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
@@ -81,7 +80,6 @@ fun TrackingScreen(
                 // showReceiptOptions = true
                 // TODO: Intégrer avec CaisseViewModel.sellTicket()
             },
-            tariffs = tariffs,
         )
     }
 
@@ -96,7 +94,6 @@ fun TrackingScreen(
 
     val state = trackingState as? LocationService.ServiceState.Tracking
 
-    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
 
     // Auto-center state
@@ -717,7 +714,7 @@ private fun ReceiptOptionsBottomSheet(
                     onDismiss()
                 },
                 modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Violet400),
+                colors = ButtonDefaults.buttonColors(containerColor = Violet500),
             ) {
                 Icon(Icons.Default.Print, "Imprimer", modifier = Modifier.padding(end = 8.dp))
                 Text("Imprimer le reçu")
@@ -741,5 +738,6 @@ private val TicketType.displayName: String
     get() = when (this) {
         TicketType.PLEIN_TARIF -> "Plein tarif"
         TicketType.CARNET -> "Carnet"
-        TicketType.ABONNEMENT -> "Abonnement"
+        TicketType.ABONNEMENT_MENSUEL -> "Abonnement"
+        TicketType.CONTREMARQUE -> "Contremarque"
     }

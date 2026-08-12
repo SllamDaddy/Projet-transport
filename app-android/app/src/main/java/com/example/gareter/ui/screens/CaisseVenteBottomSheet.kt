@@ -28,9 +28,9 @@ import com.example.gareter.ui.viewmodel.CaisseViewModel
 fun CaisseVenteBottomSheet(
     onDismiss: () -> Unit,
     onSellTicket: (TicketType, Int) -> Unit,
-    tariffs: Map<TicketType, Int>,
     viewModel: CaisseViewModel = viewModel(),
 ) {
+    val tariffs by viewModel.tariffs.collectAsStateWithLifecycle()
     var selectedTicket by remember { mutableStateOf<TicketType?>(null) }
     var showConfirm by remember { mutableStateOf(false) }
 
@@ -219,5 +219,6 @@ private val TicketType.displayName: String
     get() = when (this) {
         TicketType.PLEIN_TARIF -> "Plein tarif (1 voyage)"
         TicketType.CARNET -> "Carnet 10 voyages"
-        TicketType.ABONNEMENT -> "Abonnement mensuel"
+        TicketType.ABONNEMENT_MENSUEL -> "Abonnement mensuel"
+        TicketType.CONTREMARQUE -> "Contremarque"
     }

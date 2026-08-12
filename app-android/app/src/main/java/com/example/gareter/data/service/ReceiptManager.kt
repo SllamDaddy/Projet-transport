@@ -102,5 +102,6 @@ private val TicketType.displayName: String
     get() = when (this) {
         TicketType.PLEIN_TARIF -> "Plein tarif (1 voyage)"
         TicketType.CARNET -> "Carnet 10 voyages"
-        TicketType.ABONNEMENT -> "Abonnement mensuel"
+        TicketType.ABONNEMENT_MENSUEL -> "Abonnement mensuel"
+        TicketType.CONTREMARQUE -> "Contremarque"
     }

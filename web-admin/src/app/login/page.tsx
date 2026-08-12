@@ -64,7 +64,7 @@ export default function LoginPage() {
             Projet Transport
           </h2>
           <p className="mt-2 text-center text-sm text-dark-on-surface-variant">
-            Espace d'administration et d'exploitation
+            {"Espace d'administration et d'exploitation"}
           </p>
         </div>
 

@@ -60,6 +60,7 @@ export default function DashboardPage() {
         });
 
         // Safe cast for relations
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const formattedRapports = (rapportsData ?? []).map((r: any) => ({
           id: r.id,
           service_nom: r.service_nom,
@@ -91,7 +92,7 @@ export default function DashboardPage() {
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-dark-on-surface">Tableau de bord</h2>
           <p className="text-sm text-dark-on-surface-variant">
-            Vue d'ensemble de l'exploitation en temps réel
+            {"Vue d'ensemble de l'exploitation en temps réel"}
           </p>
         </div>
 

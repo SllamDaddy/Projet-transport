@@ -9,6 +9,7 @@
   background: #0d1929 !important;
 }
 
+:root {
   --background: #0d1929;
   --foreground: #e2ebf8;
   

@@ -45,6 +45,7 @@ export default function LignesPage() {
         .select('*')
         .order('cree_le', { ascending: false });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const formatted = (data ?? []).map((l: any) => ({
         ...l,
         stations: Array.isArray(l.stations) ? l.stations : []
@@ -69,6 +70,7 @@ export default function LignesPage() {
     setStations(stations.filter((_, i) => i !== index));
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleStationChange = (index: number, field: keyof Omit<Station, 'id'>, value: any) => {
     const updated = [...stations];
     updated[index] = {
@@ -160,7 +162,7 @@ export default function LignesPage() {
   const handleEditClick = (ligne: Ligne) => {
     setEditingLigne(ligne);
     setNom(ligne.nom);
-    setStations(ligne.stations.map(({ id, ...rest }) => rest));
+    setStations(ligne.stations.map(({ id: _id, ...rest }) => rest));
   };
 
   return (

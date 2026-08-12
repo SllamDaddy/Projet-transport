@@ -162,7 +162,13 @@ export default function LignesPage() {
   const handleEditClick = (ligne: Ligne) => {
     setEditingLigne(ligne);
     setNom(ligne.nom);
-    setStations(ligne.stations.map(({ id: _id, ...rest }) => rest));
+    setStations(
+      ligne.stations.map((s) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id, ...rest } = s;
+        return rest;
+      })
+    );
   };
 
   return (

@@ -15,6 +15,10 @@ import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
+import java.net.URL
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "gare_ter_prefs")
 
@@ -187,6 +191,50 @@ class RouteRepository(private val context: Context) {
             saveRoutes(current)
             Result.success(addedOrUpdated)
         } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    private class SupabaseLigne(
+        val id: String,
+        val nom: String,
+        val stations: List<Station>,
+        val actif: Boolean
+    )
+
+    suspend fun fetchRoutesFromSupabase(): Result<List<Route>> = withContext(Dispatchers.IO) {
+        val urlString = "https://pnqdwreqxdwcyggdioba.supabase.co/rest/v1/lignes?select=*"
+        try {
+            val url = URL(urlString)
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.connectTimeout = 5000
+            connection.readTimeout = 5000
+            connection.setRequestProperty("apikey", "sb_publishable_whHuPPByZUTGq3qsMsEpFw_UdV-fAZR")
+            connection.setRequestProperty("Authorization", "Bearer sb_publishable_whHuPPByZUTGq3qsMsEpFw_UdV-fAZR")
+            connection.setRequestProperty("User-Agent", "GareTER/1.0 (Android)")
+
+            if (connection.responseCode == 200) {
+                val json = connection.inputStream.bufferedReader().use { it.readText() }
+                val type = object : TypeToken<List<SupabaseLigne>>() {}.type
+                val rawLignes: List<SupabaseLigne> = gson.fromJson(json, type) ?: emptyList()
+                
+                val routes = rawLignes.map { l ->
+                    Route(
+                        id = l.id,
+                        title = l.nom,
+                        stations = l.stations,
+                        enabled = l.actif,
+                        createdAt = System.currentTimeMillis()
+                    )
+                }
+                saveRoutes(routes)
+                Result.success(routes)
+            } else {
+                Result.failure(Exception("HTTP Error: ${connection.responseCode}"))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
             Result.failure(e)
         }
     }

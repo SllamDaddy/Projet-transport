@@ -42,6 +42,7 @@ fun HomeScreen(
     val routes by viewModel.routes.collectAsStateWithLifecycle()
     val trackingState by viewModel.trackingState.collectAsStateWithLifecycle()
     val activeRoute by viewModel.activeRoute.collectAsStateWithLifecycle()
+    val syncLoading by viewModel.syncLoading.collectAsStateWithLifecycle()
     val isTracking = trackingState is LocationService.ServiceState.Tracking
 
     LaunchedEffect(trackingState) {
@@ -58,7 +59,12 @@ fun HomeScreen(
             contentPadding = PaddingValues(bottom = 88.dp),
         ) {
             item {
-                HomeHeader(onGoToSettings = onGoToSettings, routeCount = routes.size)
+                HomeHeader(
+                    onGoToSettings = onGoToSettings,
+                    routeCount = routes.size,
+                    onSync = { viewModel.syncRoutesFromSupabase() },
+                    syncLoading = syncLoading
+                )
             }
 
             (trackingState as? LocationService.ServiceState.Tracking)?.let { state ->
@@ -121,7 +127,12 @@ fun HomeScreen(
 }
 
 @Composable
-private fun HomeHeader(onGoToSettings: () -> Unit, routeCount: Int) {
+private fun HomeHeader(
+    onGoToSettings: () -> Unit,
+    routeCount: Int,
+    onSync: () -> Unit,
+    syncLoading: Boolean
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -147,13 +158,34 @@ private fun HomeHeader(onGoToSettings: () -> Unit, routeCount: Int) {
                         fontWeight = FontWeight.ExtraBold,
                     )
                 }
-                IconButton(
-                    onClick = onGoToSettings,
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.15f)),
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Default.Settings, "Paramètres", tint = Color.White)
+                    IconButton(
+                        onClick = onSync,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.15f)),
+                    ) {
+                        if (syncLoading) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                color = Color.White,
+                                strokeWidth = 2.dp
+                            )
+                        } else {
+                            Icon(Icons.Default.Refresh, "Synchroniser", tint = Color.White)
+                        }
+                    }
+                    IconButton(
+                        onClick = onGoToSettings,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.15f)),
+                    ) {
+                        Icon(Icons.Default.Settings, "Paramètres", tint = Color.White)
+                    }
                 }
             }
 

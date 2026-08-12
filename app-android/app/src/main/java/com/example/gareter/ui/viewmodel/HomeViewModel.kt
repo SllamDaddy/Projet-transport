@@ -26,6 +26,21 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
     private val repository = RouteRepository(application)
 
+    private val _syncLoading = MutableStateFlow(false)
+    val syncLoading = _syncLoading.asStateFlow()
+
+    init {
+        syncRoutesFromSupabase()
+    }
+
+    fun syncRoutesFromSupabase() {
+        viewModelScope.launch {
+            _syncLoading.value = true
+            repository.fetchRoutesFromSupabase()
+            _syncLoading.value = false
+        }
+    }
+
     val routes: StateFlow<List<Route>> = repository.routesFlow
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 

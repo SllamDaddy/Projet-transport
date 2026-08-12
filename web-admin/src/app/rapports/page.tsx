@@ -109,7 +109,7 @@ export default function RapportsPage() {
           </div>
         ) : rapports.length === 0 ? (
           <div className="bg-dark-surface border border-dark-outline rounded-3xl p-12 text-center text-dark-on-surface-variant">
-            Aucun rapport de service n'a été transmis pour le moment.
+            {"Aucun rapport de service n'a été transmis pour le moment."}
           </div>
         ) : (
           <div className="space-y-4">

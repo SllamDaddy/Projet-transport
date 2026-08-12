@@ -202,9 +202,10 @@ export default function LignesPage() {
       setStations([{ name: '', latitude: 0, longitude: 0, approachRadius: 300, arrivalRadius: 80 }]);
       setEditingLigne(null);
       fetchLignes();
-    } catch (error: any) {
-      console.error('Error saving line:', error);
-      alert(error?.message || 'Une erreur est survenue lors de la sauvegarde.');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error('Error saving line:', err);
+      alert(err.message || 'Une erreur est survenue lors de la sauvegarde.');
     } finally {
       setSubmitting(false);
     }

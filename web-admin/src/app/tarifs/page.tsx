@@ -76,9 +76,10 @@ export default function TarifsPage() {
       setPrix('');
       setEditingTarif(null);
       fetchTarifs();
-    } catch (error: any) {
-      console.error('Error saving tariff:', error);
-      alert(error?.message || 'Une erreur est survenue lors de la sauvegarde.');
+    } catch (error) {
+      const err = error instanceof Error ? error : new Error(String(error));
+      console.error('Error saving tariff:', err);
+      alert(err.message || 'Une erreur est survenue lors de la sauvegarde.');
     } finally {
       setSubmitting(false);
     }
@@ -90,7 +91,7 @@ export default function TarifsPage() {
     setPrix(tarif.prix);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer ce tarif ?')) return;
 
     try {

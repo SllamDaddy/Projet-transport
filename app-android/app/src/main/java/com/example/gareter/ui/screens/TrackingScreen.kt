@@ -29,10 +29,16 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.gareter.data.model.TicketSale
+import com.example.gareter.data.model.TicketType
 import com.example.gareter.data.repository.OSRMService
+import com.example.gareter.data.service.PrinterManager
+import com.example.gareter.data.service.ReceiptManager
 import com.example.gareter.service.LocationService
 import com.example.gareter.ui.theme.*
+import com.example.gareter.ui.viewmodel.CaisseViewModel
 import com.example.gareter.ui.viewmodel.HomeViewModel
+import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -51,9 +57,41 @@ fun TrackingScreen(
     val trackingState by viewModel.trackingState.collectAsStateWithLifecycle()
     val activeRoute by viewModel.activeRoute.collectAsStateWithLifecycle()
     val currentLocation by viewModel.currentLocation.collectAsStateWithLifecycle()
+    val tariffs by viewModel.tariffs.collectAsStateWithLifecycle()
+    val driverAgent by viewModel.driverAgent.collectAsStateWithLifecycle()
+
+    val context = LocalContext.current
+    var showVenteBottomSheet by remember { mutableStateOf(false) }
+    var showReceiptOptions by remember { mutableStateOf(false) }
+    var lastSale by remember { mutableStateOf<com.example.gareter.data.model.TicketSale?>(null) }
 
     LaunchedEffect(trackingState) {
         if (trackingState is LocationService.ServiceState.Idle) onBack()
+    }
+
+    // BottomSheet Vente
+    if (showVenteBottomSheet) {
+        CaisseVenteBottomSheet(
+            onDismiss = { showVenteBottomSheet = false },
+            onSellTicket = { type, price ->
+                // 1. Créer la vente dans Caisse
+                // 2. Afficher options reçu
+                // 3. Imprimer ticket (si imprimante disponible)
+                // lastSale = sale
+                // showReceiptOptions = true
+                // TODO: Intégrer avec CaisseViewModel.sellTicket()
+            },
+            tariffs = tariffs,
+        )
+    }
+
+    // Options de reçu (SMS / Email / Imprimer / Rien)
+    if (showReceiptOptions && lastSale != null) {
+        ReceiptOptionsBottomSheet(
+            sale = lastSale!!,
+            agentNumber = driverAgent ?: "N/A",
+            onDismiss = { showReceiptOptions = false },
+        )
     }
 
     val state = trackingState as? LocationService.ServiceState.Tracking
@@ -415,7 +453,7 @@ fun TrackingScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Button(
-                        onClick = { /* Action Vente - affiche tarifs */ },
+                        onClick = { showVenteBottomSheet = true },
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp),
@@ -435,7 +473,7 @@ fun TrackingScreen(
                     }
 
                     Button(
-                        onClick = { /* Action Scan QR */ },
+                        onClick = { /* TODO: Action Scan QR - ouvrir CameraScreen */ },
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp),
@@ -596,3 +634,112 @@ private fun StopRow(name: String, isPassed: Boolean, isCurrent: Boolean, isLast:
         )
     }
 }
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ReceiptOptionsBottomSheet(
+    sale: TicketSale,
+    agentNumber: String,
+    onDismiss: () -> Unit,
+) {
+    val context = LocalContext.current
+    val receiptManager = remember { ReceiptManager(context) }
+    val coroutineScope = rememberCoroutineScope()
+
+    var receiptText by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) {
+        coroutineScope.launch {
+            receiptText = receiptManager.generateReceiptText(sale, agentNumber, "N/A")
+        }
+    }
+
+    if (receiptText == null) {
+        // Loading state
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surface,
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Text(
+                "Envoyer le reçu ?",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+            )
+
+            Spacer(Modifier.height(8.dp))
+
+            // SMS
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        receiptManager.sendReceiptViaSMS("+33612345678", receiptText!!)
+                    }
+                    onDismiss()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Violet600),
+            ) {
+                Icon(Icons.Default.Message, "SMS", modifier = Modifier.padding(end = 8.dp))
+                Text("Envoyer par SMS")
+            }
+
+            // Email
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        receiptManager.sendReceiptViaEmail("client@example.com", receiptText!!, sale.type.displayName)
+                    }
+                    onDismiss()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Violet500),
+            ) {
+                Icon(Icons.Default.Email, "Email", modifier = Modifier.padding(end = 8.dp))
+                Text("Envoyer par Email")
+            }
+
+            // Imprimer
+            Button(
+                onClick = {
+                    // TODO: Intégrer PrinterManager avec impression Bluetooth
+                    onDismiss()
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = Violet400),
+            ) {
+                Icon(Icons.Default.Print, "Imprimer", modifier = Modifier.padding(end = 8.dp))
+                Text("Imprimer le reçu")
+            }
+
+            // Fermer
+            Button(
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(),
+            ) {
+                Text("Fermer")
+            }
+
+            Spacer(Modifier.height(16.dp))
+        }
+    }
+}
+
+private val TicketType.displayName: String
+    get() = when (this) {
+        TicketType.PLEIN_TARIF -> "Plein tarif"
+        TicketType.CARNET -> "Carnet"
+        TicketType.ABONNEMENT -> "Abonnement"
+    }

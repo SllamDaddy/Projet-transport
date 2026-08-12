@@ -1,6 +1,14 @@
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
-:root {
+/* Filtre mode sombre pour les tuiles de la carte Leaflet */
+.dark-leaflet-map .leaflet-tile-container {
+  filter: invert(100%) hue-rotate(180deg) brightness(95%) contrast(90%);
+}
+.dark-leaflet-map {
+  background: #0d1929 !important;
+}
+
   --background: #0d1929;
   --foreground: #e2ebf8;
   

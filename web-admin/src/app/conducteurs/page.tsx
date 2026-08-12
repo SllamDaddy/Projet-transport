@@ -289,9 +289,10 @@ export default function ConducteursPage() {
                 <input
                   type="email"
                   required
+                  disabled={!!editingConducteur}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1 block w-full rounded-xl border border-dark-outline bg-dark-bg/60 px-4 py-2.5 text-dark-on-surface placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
+                  className="mt-1 block w-full rounded-xl border border-dark-outline bg-dark-bg/60 px-4 py-2.5 text-dark-on-surface placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   placeholder="Ex: jean.dupont@email.com"
                 />
               </div>

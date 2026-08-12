@@ -5,11 +5,11 @@ import Sidebar from '@/components/Sidebar';
 import { supabase } from '@/lib/supabase';
 
 interface Tarif {
-  id: string;
-  nom: string;
+  id: number;
+  nom_ticket: string;
   prix: number;
-  description: string;
-  cree_le?: string;
+  actif: boolean;
+  mis_a_jour_le?: string;
 }
 
 export default function TarifsPage() {
@@ -20,7 +20,6 @@ export default function TarifsPage() {
   // Form states
   const [nom, setNom] = useState('');
   const [prix, setPrix] = useState<number | ''>('');
-  const [description, setDescription] = useState('');
   const [editingTarif, setEditingTarif] = useState<Tarif | null>(null);
 
   useEffect(() => {
@@ -55,9 +54,8 @@ export default function TarifsPage() {
         const { error } = await supabase
           .from('tarifs')
           .update({
-            nom,
-            prix: Number(prix),
-            description
+            nom_ticket: nom,
+            prix: Number(prix)
           })
           .eq('id', editingTarif.id);
 
@@ -67,9 +65,8 @@ export default function TarifsPage() {
         const { error } = await supabase
           .from('tarifs')
           .insert({
-            nom,
-            prix: Number(prix),
-            description
+            nom_ticket: nom,
+            prix: Number(prix)
           });
 
         if (error) throw error;
@@ -77,7 +74,6 @@ export default function TarifsPage() {
 
       setNom('');
       setPrix('');
-      setDescription('');
       setEditingTarif(null);
       fetchTarifs();
     } catch (error: any) {
@@ -90,9 +86,8 @@ export default function TarifsPage() {
 
   const handleEditClick = (tarif: Tarif) => {
     setEditingTarif(tarif);
-    setNom(tarif.nom);
+    setNom(tarif.nom_ticket);
     setPrix(tarif.prix);
-    setDescription(tarif.description || '');
   };
 
   const handleDelete = async (id: string) => {
@@ -148,14 +143,11 @@ export default function TarifsPage() {
                   >
                     <div>
                       <div className="flex items-start justify-between gap-2">
-                        <h4 className="font-bold text-dark-on-surface text-base">{tarif.nom}</h4>
+                        <h4 className="font-bold text-dark-on-surface text-base">{tarif.nom_ticket}</h4>
                         <span className="text-lg font-extrabold text-blue-400 bg-blue-600/10 border border-blue-600/30 px-3 py-1 rounded-xl">
                           {tarif.prix.toFixed(2)} €
                         </span>
                       </div>
-                      <p className="text-xs text-dark-on-surface-variant mt-2 font-medium">
-                        {tarif.description || 'Aucune description fournie.'}
-                      </p>
                     </div>
 
                     <div className="flex items-center justify-end gap-2 border-t border-dark-outline/20 pt-3">
@@ -221,18 +213,6 @@ export default function TarifsPage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-dark-on-surface-variant uppercase tracking-wider">
-                  Description
-                </label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  className="mt-1 block w-full rounded-xl border border-dark-outline bg-dark-bg/60 px-4 py-2.5 text-dark-on-surface placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm h-24 resize-none"
-                  placeholder="Détails du ticket..."
-                />
-              </div>
-
               <div className="flex gap-2">
                 {editingTarif && (
                   <button
@@ -241,7 +221,6 @@ export default function TarifsPage() {
                       setEditingTarif(null);
                       setNom('');
                       setPrix('');
-                      setDescription('');
                     }}
                     className="flex-1 rounded-xl bg-slate-800 border border-slate-700 py-2.5 text-sm font-semibold text-slate-300 hover:bg-slate-700 transition-all cursor-pointer"
                   >

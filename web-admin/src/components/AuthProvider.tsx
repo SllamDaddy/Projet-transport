@@ -20,11 +20,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    const checkUserRoleAndSet = async (sessionUser: User | null) => {
+      if (sessionUser && sessionUser.user_metadata?.role === 'conducteur') {
+        alert("Accès refusé. Ce compte est réservé aux conducteurs sur l'application mobile.");
+        await supabase.auth.signOut();
+        setUser(null);
+        router.push('/login');
+      } else {
+        setUser(sessionUser);
+      }
+    };
+
     // Check active session
     const getSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
+        await checkUserRoleAndSet(session?.user ?? null);
       } catch (error) {
         console.error('Error getting session:', error);
       } finally {
@@ -35,15 +46,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getSession();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      await checkUserRoleAndSet(session?.user ?? null);
       setLoading(false);
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (!loading) {

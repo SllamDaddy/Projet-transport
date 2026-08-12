@@ -18,10 +18,10 @@ export default function ConducteursPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  // Form states
   const [nom, setNom] = useState('');
   const [email, setEmail] = useState('');
   const [telephone, setTelephone] = useState('');
+  const [motDePasse, setMotDePasse] = useState('');
   const [editingConducteur, setEditingConducteur] = useState<Conducteur | null>(null);
 
   useEffect(() => {
@@ -62,11 +62,15 @@ export default function ConducteursPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nom.trim() || !email.trim()) return;
+    if (!editingConducteur && !motDePasse.trim()) {
+      alert('Le mot de passe est requis pour la création.');
+      return;
+    }
 
     setSubmitting(true);
     try {
       if (editingConducteur) {
-        // Update driver
+        // Update driver profile row
         const { error } = await supabase
           .from('conducteurs')
           .update({
@@ -78,29 +82,37 @@ export default function ConducteursPage() {
 
         if (error) throw error;
       } else {
-        // Insert new driver profile row
-        // Note: In production, you would also invite/create in Supabase Auth,
-        // but adding the row here holds the profile.
-        const { error } = await supabase
-          .from('conducteurs')
-          .insert({
+        // Call backend API Route using the bearer token to authenticate
+        const { data: { session } } = await supabase.auth.getSession();
+        const response = await fetch('/api/conducteurs', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token || ''}`
+          },
+          body: JSON.stringify({
             nom,
             email,
             telephone,
-            actif: true
-          });
+            motDePasse
+          })
+        });
 
-        if (error) throw error;
+        const resData = await response.json();
+        if (!response.ok) {
+          throw new Error(resData.error || 'Erreur lors de la création du compte conducteur.');
+        }
       }
 
       setNom('');
       setEmail('');
       setTelephone('');
+      setMotDePasse('');
       setEditingConducteur(null);
       fetchConducteurs();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving driver:', error);
-      alert('Une erreur est survenue lors de la sauvegarde.');
+      alert(error.message || 'Une erreur est survenue lors de la sauvegarde.');
     } finally {
       setSubmitting(false);
     }
@@ -271,10 +283,27 @@ export default function ConducteursPage() {
                 />
               </div>
 
+              {/* Password field only shown for new drivers */}
+              {!editingConducteur && (
+                <div>
+                  <label className="block text-xs font-semibold text-dark-on-surface-variant uppercase tracking-wider">
+                    Mot de passe initial
+                  </label>
+                  <input
+                    type="password"
+                    required
+                    value={motDePasse}
+                    onChange={(e) => setMotDePasse(e.target.value)}
+                    className="mt-1 block w-full rounded-xl border border-dark-outline bg-dark-bg/60 px-4 py-2.5 text-dark-on-surface placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
+                    placeholder="Min. 6 caractères"
+                  />
+                </div>
+              )}
+
               {/* Notice explicative */}
               {!editingConducteur && (
                 <div className="bg-blue-600/5 border border-blue-600/20 rounded-xl p-3.5 text-[11px] text-dark-on-surface-variant leading-relaxed">
-                  💡 <strong>Note :</strong> L’ajout du conducteur ici crée son profil. Pour qu’il puisse se connecter à l’application mobile, veillez également à ce qu’il possède un compte utilisateur valide dans <em>Supabase Authentication &gt; Users</em> avec cette même adresse email.
+                  💡 <strong>Sécurité :</strong> Le compte est créé avec le rôle <em>conducteur</em>. Il pourra se connecter sur l’application mobile, mais sera automatiquement rejeté s’il tente d’accéder à cette console d’administration.
                 </div>
               )}
 

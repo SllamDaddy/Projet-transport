@@ -274,7 +274,7 @@ export default function ConducteursPage() {
               {/* Notice explicative */}
               {!editingConducteur && (
                 <div className="bg-blue-600/5 border border-blue-600/20 rounded-xl p-3.5 text-[11px] text-dark-on-surface-variant leading-relaxed">
-                  💡 <strong>Note :</strong> L’ajout du conducteur ici crée son profil. Pour qu’il puisse se connecter à l’application mobile, veillez également à ce qu’il possède un compte utilisateur valide dans <em>Supabase Authentication > Users</em> avec cette même adresse email.
+                  💡 <strong>Note :</strong> L’ajout du conducteur ici crée son profil. Pour qu’il puisse se connecter à l’application mobile, veillez également à ce qu’il possède un compte utilisateur valide dans <em>Supabase Authentication &gt; Users</em> avec cette même adresse email.
                 </div>
               )}
 

@@ -1,15 +1,30 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
+# Caches & Logs
+*.log
+*.tmp
+*.temp
+.gemini/
+.rag/
+.antigravity/
+
+# Next.js build outputs & node_modules
+web-admin/node_modules/
+web-admin/.next/
+web-admin/out/
+web-admin/build/
+
+# Android build outputs & local config
+app-android/.gradle/
+app-android/build/
+app-android/local.properties
+app-android/app/build/
+app-android/capture.png
+
+# IDE and OS files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
 .DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
-local.properties
+Thumbs.db

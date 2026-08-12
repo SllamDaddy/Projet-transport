@@ -35,10 +35,10 @@ export async function POST(req: NextRequest) {
 
     // 2. Parse request body
     const body = await req.json();
-    const { nom, email, telephone, motDePasse } = body;
+    const { nom, email, telephone, motDePasse, agentId } = body;
 
-    if (!nom || !email || !motDePasse) {
-      return NextResponse.json({ error: 'Le nom, l\'email et le mot de passe sont requis.' }, { status: 400 });
+    if (!nom || !email || !motDePasse || !agentId) {
+      return NextResponse.json({ error: 'Le nom, l\'email, le mot de passe et l\'ID Agent sont requis.' }, { status: 400 });
     }
 
     // 3. Create user account in Supabase Auth (Auto-Confirmed) with metadata role: 'conducteur'
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       email,
       password: motDePasse,
       email_confirm: true,
-      user_metadata: { role: 'conducteur' }
+      user_metadata: { role: 'conducteur', agent_id: agentId }
     });
 
     if (authError) {
@@ -65,6 +65,7 @@ export async function POST(req: NextRequest) {
         nom,
         email,
         telephone: telephone || '',
+        agent_id: agentId,
         actif: true
       });
 

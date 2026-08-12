@@ -64,6 +64,18 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         .map { ThemeMode.valueOf(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ThemeMode.SYSTEM)
 
+    val driverAgent: StateFlow<String?> = repository.driverAgentFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    val driverName: StateFlow<String?> = repository.driverNameFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
+    fun logoutDriver() {
+        viewModelScope.launch {
+            repository.clearDriverSession()
+        }
+    }
+
     fun startTracking(route: Route, direction: RouteDirection = RouteDirection.FORWARD) {
         val ctx = getApplication<Application>()
         ctx.startForegroundService(Intent(ctx, LocationService::class.java).apply {

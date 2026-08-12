@@ -8,6 +8,7 @@ interface Conducteur {
   id: string;
   nom: string;
   email: string;
+  agent_id?: string;
   telephone: string;
   actif: boolean;
   cree_le?: string;
@@ -20,6 +21,7 @@ export default function ConducteursPage() {
 
   const [nom, setNom] = useState('');
   const [email, setEmail] = useState('');
+  const [agentId, setAgentId] = useState('');
   const [telephone, setTelephone] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
   const [editingConducteur, setEditingConducteur] = useState<Conducteur | null>(null);
@@ -61,7 +63,7 @@ export default function ConducteursPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!nom.trim() || !email.trim()) return;
+    if (!nom.trim() || !email.trim() || (!editingConducteur && !agentId.trim())) return;
     if (!editingConducteur && !motDePasse.trim()) {
       alert('Le mot de passe est requis pour la création.');
       return;
@@ -76,7 +78,8 @@ export default function ConducteursPage() {
           .update({
             nom,
             email,
-            telephone
+            telephone,
+            agent_id: agentId
           })
           .eq('id', editingConducteur.id);
 
@@ -94,7 +97,8 @@ export default function ConducteursPage() {
             nom,
             email,
             telephone,
-            motDePasse
+            motDePasse,
+            agentId
           })
         });
 
@@ -106,6 +110,7 @@ export default function ConducteursPage() {
 
       setNom('');
       setEmail('');
+      setAgentId('');
       setTelephone('');
       setMotDePasse('');
       setEditingConducteur(null);
@@ -124,6 +129,7 @@ export default function ConducteursPage() {
     setNom(conducteur.nom);
     setEmail(conducteur.email);
     setTelephone(conducteur.telephone || '');
+    setAgentId(conducteur.agent_id || '');
   };
 
   const handleDelete = async (id: string) => {
@@ -185,6 +191,11 @@ export default function ConducteursPage() {
                       <div>
                         <div className="flex items-center gap-3">
                           <h4 className="font-bold text-dark-on-surface text-base">{conducteur.nom}</h4>
+                          {conducteur.agent_id && (
+                            <span className="bg-blue-600/20 text-blue-300 border border-blue-600/30 px-2 py-0.5 rounded-lg text-xs font-semibold">
+                              ID Agent: {conducteur.agent_id}
+                            </span>
+                          )}
                           <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold tracking-wider uppercase ${
                             conducteur.actif 
                               ? 'bg-success-green/15 text-green-400 border border-success-green/30' 
@@ -259,6 +270,20 @@ export default function ConducteursPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-dark-on-surface-variant uppercase tracking-wider">
+                  ID Agent
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={agentId}
+                  onChange={(e) => setAgentId(e.target.value)}
+                  className="mt-1 block w-full rounded-xl border border-dark-outline bg-dark-bg/60 px-4 py-2.5 text-dark-on-surface placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
+                  placeholder="Ex: A123"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-dark-on-surface-variant uppercase tracking-wider">
                   Adresse Email
                 </label>
                 <input
@@ -303,6 +328,7 @@ export default function ConducteursPage() {
                       setEditingConducteur(null);
                       setNom('');
                       setEmail('');
+                      setAgentId('');
                       setTelephone('');
                     }}
                     className="flex-1 rounded-xl bg-slate-800 border border-slate-700 py-2.5 text-sm font-semibold text-slate-300 hover:bg-slate-700 transition-all cursor-pointer"

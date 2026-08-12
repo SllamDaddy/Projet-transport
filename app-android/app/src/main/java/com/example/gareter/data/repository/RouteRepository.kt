@@ -36,6 +36,9 @@ class RouteRepository(private val context: Context) {
         private val CUSTOM_STATIONS_KEY = stringPreferencesKey("custom_stations")
         private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
         private val TARIFFS_KEY = stringPreferencesKey("tariffs_json")
+        private val DRIVER_AGENT_KEY = stringPreferencesKey("driver_agent")
+        private val DRIVER_NAME_KEY = stringPreferencesKey("driver_name")
+        private val DRIVER_TOKEN_KEY = stringPreferencesKey("driver_token")
     }
 
     val routesFlow: Flow<List<Route>> = context.dataStore.data.map { prefs ->
@@ -236,6 +239,118 @@ class RouteRepository(private val context: Context) {
         } catch (e: Exception) {
             e.printStackTrace()
             Result.failure(e)
+        }
+    }
+
+    val driverAgentFlow: Flow<String?> = context.dataStore.data.map { prefs ->
+        prefs[DRIVER_AGENT_KEY]
+    }
+
+    val driverNameFlow: Flow<String?> = context.dataStore.data.map { prefs ->
+        prefs[DRIVER_NAME_KEY]
+    }
+
+    suspend fun saveDriverSession(agentId: String, name: String, token: String) {
+        context.dataStore.edit { prefs ->
+            prefs[DRIVER_AGENT_KEY] = agentId
+            prefs[DRIVER_NAME_KEY] = name
+            prefs[DRIVER_TOKEN_KEY] = token
+        }
+    }
+
+    suspend fun clearDriverSession() {
+        context.dataStore.edit { prefs ->
+            prefs.remove(DRIVER_AGENT_KEY)
+            prefs.remove(DRIVER_NAME_KEY)
+            prefs.remove(DRIVER_TOKEN_KEY)
+        }
+    }
+
+    private class SupabaseConducteur(
+        val id: String,
+        val nom: String,
+        val email: String,
+        val agent_id: String,
+        val actif: Boolean
+    )
+
+    private class SupabaseAuthResponse(
+        val access_token: String,
+        val user: SupabaseUser
+    )
+
+    private class SupabaseUser(
+        val id: String,
+        val email: String
+    )
+
+    suspend fun loginDriver(agentId: String, motDePasse: String): Result<String> = withContext(Dispatchers.IO) {
+        try {
+            // 1. Fetch the driver corresponding to the agentId from database
+            val getUrl = URL("https://pnqdwreqxdwcyggdioba.supabase.co/rest/v1/conducteurs?agent_id=eq.${agentId}&select=*")
+            val connectionGet = getUrl.openConnection() as HttpURLConnection
+            connectionGet.requestMethod = "GET"
+            connectionGet.connectTimeout = 5000
+            connectionGet.readTimeout = 5000
+            connectionGet.setRequestProperty("apikey", "sb_publishable_whHuPPByZUTGq3qsMsEpFw_UdV-fAZR")
+            connectionGet.setRequestProperty("Authorization", "Bearer sb_publishable_whHuPPByZUTGq3qsMsEpFw_UdV-fAZR")
+            connectionGet.setRequestProperty("User-Agent", "GareTER/1.0 (Android)")
+
+            if (connectionGet.responseCode != 200) {
+                return@withContext Result.failure(Exception("Erreur de connexion Supabase (code ${connectionGet.responseCode})"))
+            }
+
+            val responseGetJson = connectionGet.inputStream.bufferedReader().use { it.readText() }
+            val listType = object : TypeToken<List<SupabaseConducteur>>() {}.type
+            val conducteurs: List<SupabaseConducteur> = gson.fromJson(responseGetJson, listType) ?: emptyList()
+
+            if (conducteurs.isEmpty()) {
+                return@withContext Result.failure(Exception("Identifiant Agent inconnu."))
+            }
+
+            val conducteur = conducteurs.first()
+            if (!conducteur.actif) {
+                return@withContext Result.failure(Exception("Ce compte conducteur est désactivé/bloqué."))
+            }
+
+            // 2. Perform authentication with the email and password
+            val postUrl = URL("https://pnqdwreqxdwcyggdioba.supabase.co/auth/v1/token?grant_type=password")
+            val connectionPost = postUrl.openConnection() as HttpURLConnection
+            connectionPost.requestMethod = "POST"
+            connectionPost.doOutput = true
+            connectionPost.connectTimeout = 5000
+            connectionPost.readTimeout = 5000
+            connectionPost.setRequestProperty("apikey", "sb_publishable_whHuPPByZUTGq3qsMsEpFw_UdV-fAZR")
+            connectionPost.setRequestProperty("Content-Type", "application/json")
+            connectionPost.setRequestProperty("User-Agent", "GareTER/1.0 (Android)")
+
+            val requestBody = gson.toJson(mapOf("email" to conducteur.email, "password" to motDePasse))
+            connectionPost.outputStream.bufferedWriter().use { it.write(requestBody) }
+
+            if (connectionPost.responseCode == 200) {
+                val responsePostJson = connectionPost.inputStream.bufferedReader().use { it.readText() }
+                val authResponse = gson.fromJson(responsePostJson, SupabaseAuthResponse::class.java)
+                
+                saveDriverSession(agentId, conducteur.nom, authResponse.access_token)
+                Result.success(conducteur.nom)
+            } else {
+                val errorStream = connectionPost.errorStream
+                val errorMessage = if (errorStream != null) {
+                    try {
+                        val errorJson = errorStream.bufferedReader().use { it.readText() }
+                        val errorMap = gson.fromJson<Map<String, Any>>(errorJson, object : TypeToken<Map<String, Any>>() {}.type)
+                        errorMap["error_description"] as? String ?: errorMap["message"] as? String ?: "Mot de passe incorrect."
+                    } catch (e: Exception) {
+                        "Identifiants invalides."
+                    }
+                } else {
+                    "Identifiants invalides."
+                }
+                Result.failure(Exception(errorMessage))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.failure(Exception("Erreur de réseau : ${e.localizedMessage}"))
         }
     }
 }

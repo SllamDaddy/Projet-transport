@@ -16,6 +16,7 @@ import com.example.gareter.ui.screens.CarnetScanScreen
 import com.example.gareter.ui.screens.CaisseScreen
 import com.example.gareter.ui.screens.CreateRouteScreen
 import com.example.gareter.ui.screens.HomeScreen
+import com.example.gareter.ui.screens.LoginScreen
 import com.example.gareter.ui.screens.RapportScreen
 import com.example.gareter.ui.screens.SettingsScreen
 import com.example.gareter.ui.screens.StationEditScreen
@@ -26,6 +27,7 @@ import com.example.gareter.ui.viewmodel.CreateRouteViewModel
 import com.example.gareter.ui.viewmodel.HomeViewModel
 
 private object Dest {
+    const val LOGIN = "login"
     const val HOME = "home"
     const val SETTINGS = "settings"
     const val CREATE_ROUTE = "create_route?routeId={routeId}"
@@ -44,8 +46,31 @@ fun NavGraph(
     caisseViewModel: CaisseViewModel,
 ) {
     val navController = rememberNavController()
+    val driverAgent by homeViewModel.driverAgent.collectAsState()
 
-    NavHost(navController = navController, startDestination = Dest.HOME) {
+    LaunchedEffect(driverAgent) {
+        if (driverAgent != null) {
+            navController.navigate(Dest.HOME) {
+                popUpTo(Dest.LOGIN) { inclusive = true }
+            }
+        } else {
+            navController.navigate(Dest.LOGIN) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
+
+    NavHost(navController = navController, startDestination = Dest.LOGIN) {
+
+        composable(Dest.LOGIN) {
+            LoginScreen(
+                onLoginSuccess = {
+                    navController.navigate(Dest.HOME) {
+                        popUpTo(Dest.LOGIN) { inclusive = true }
+                    }
+                }
+            )
+        }
 
         composable(Dest.HOME) {
             val trackingState by homeViewModel.trackingState.collectAsState()

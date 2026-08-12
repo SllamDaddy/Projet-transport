@@ -205,6 +205,11 @@ class RouteRepository(private val context: Context) {
         val actif: Boolean
     )
 
+    private class SupabaseTarif(
+        val nom_ticket: String,
+        val prix_cents: Int
+    )
+
     suspend fun fetchRoutesFromSupabase(): Result<List<Route>> = withContext(Dispatchers.IO) {
         val urlString = "https://pnqdwreqxdwcyggdioba.supabase.co/rest/v1/lignes?select=*"
         try {
@@ -221,7 +226,7 @@ class RouteRepository(private val context: Context) {
                 val json = connection.inputStream.bufferedReader().use { it.readText() }
                 val type = object : TypeToken<List<SupabaseLigne>>() {}.type
                 val rawLignes: List<SupabaseLigne> = gson.fromJson(json, type) ?: emptyList()
-                
+
                 val routes = rawLignes.map { l ->
                     Route(
                         id = l.id,
@@ -233,6 +238,44 @@ class RouteRepository(private val context: Context) {
                 }
                 saveRoutes(routes)
                 Result.success(routes)
+            } else {
+                Result.failure(Exception("HTTP Error: ${connection.responseCode}"))
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
+
+    suspend fun fetchTariffsFromSupabase(): Result<Map<TicketType, Int>> = withContext(Dispatchers.IO) {
+        val urlString = "https://pnqdwreqxdwcyggdioba.supabase.co/rest/v1/tarifs?select=*"
+        try {
+            val url = URL(urlString)
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.connectTimeout = 5000
+            connection.readTimeout = 5000
+            connection.setRequestProperty("apikey", "sb_publishable_whHuPPByZUTGq3qsMsEpFw_UdV-fAZR")
+            connection.setRequestProperty("Authorization", "Bearer sb_publishable_whHuPPByZUTGq3qsMsEpFw_UdV-fAZR")
+            connection.setRequestProperty("User-Agent", "GareTER/1.0 (Android)")
+
+            if (connection.responseCode == 200) {
+                val json = connection.inputStream.bufferedReader().use { it.readText() }
+                val type = object : TypeToken<List<SupabaseTarif>>() {}.type
+                val rawTarifs: List<SupabaseTarif> = gson.fromJson(json, type) ?: emptyList()
+
+                val tariffs = mutableMapOf<TicketType, Int>()
+                rawTarifs.forEach { tarif ->
+                    try {
+                        val ticketType = TicketType.valueOf(tarif.nom_ticket)
+                        tariffs[ticketType] = tarif.prix_cents
+                    } catch (e: Exception) {
+                        // Skip invalid ticket types
+                    }
+                }
+
+                saveTariffs(tariffs)
+                Result.success(tariffs)
             } else {
                 Result.failure(Exception("HTTP Error: ${connection.responseCode}"))
             }

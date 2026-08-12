@@ -59,9 +59,10 @@ fun HomeScreen(
             contentPadding = PaddingValues(bottom = 88.dp),
         ) {
             item {
+                val driverAgent by viewModel.driverAgent.collectAsStateWithLifecycle()
                 HomeHeader(
                     onGoToSettings = onGoToSettings,
-                    routeCount = routes.size,
+                    driverAgent = driverAgent ?: "Conducteur",
                     onSync = { viewModel.syncRoutesFromSupabase() },
                     syncLoading = syncLoading
                 )
@@ -70,8 +71,6 @@ fun HomeScreen(
             (trackingState as? LocationService.ServiceState.Tracking)?.let { state ->
                 item { TrackingBanner(state = state, onClick = onGoToTracking) }
             }
-
-            item { CaisseShortcut(onClick = onGoToCaisse) }
 
             item {
                 Row(
@@ -82,11 +81,6 @@ fun HomeScreen(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text("Mes lignes", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
-                    Text(
-                        "${routes.size} ligne${if (routes.size > 1) "s" else ""}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
                 }
             }
 
@@ -116,7 +110,7 @@ fun HomeScreen(
 @Composable
 private fun HomeHeader(
     onGoToSettings: () -> Unit,
-    routeCount: Int,
+    driverAgent: String,
     onSync: () -> Unit,
     syncLoading: Boolean
 ) {
@@ -134,12 +128,12 @@ private fun HomeHeader(
             ) {
                 Column {
                     Text(
-                        "Bonjour,",
+                        "Numéro d'agent",
                         style = MaterialTheme.typography.bodyLarge,
                         color = Color.White.copy(alpha = 0.8f),
                     )
                     Text(
-                        "Conducteur",
+                        driverAgent,
                         style = MaterialTheme.typography.headlineMedium,
                         color = Color.White,
                         fontWeight = FontWeight.ExtraBold,

@@ -9,7 +9,6 @@ interface Conducteur {
   nom: string;
   email: string;
   agent_id?: string;
-  telephone: string;
   actif: boolean;
   cree_le?: string;
 }
@@ -22,7 +21,6 @@ export default function ConducteursPage() {
   const [nom, setNom] = useState('');
   const [email, setEmail] = useState('');
   const [agentId, setAgentId] = useState('');
-  const [telephone, setTelephone] = useState('');
   const [motDePasse, setMotDePasse] = useState('');
   const [editingConducteur, setEditingConducteur] = useState<Conducteur | null>(null);
 
@@ -78,7 +76,6 @@ export default function ConducteursPage() {
           .update({
             nom,
             email,
-            telephone,
             agent_id: agentId
           })
           .eq('id', editingConducteur.id);
@@ -96,7 +93,6 @@ export default function ConducteursPage() {
           body: JSON.stringify({
             nom,
             email,
-            telephone,
             motDePasse,
             agentId
           })
@@ -111,7 +107,6 @@ export default function ConducteursPage() {
       setNom('');
       setEmail('');
       setAgentId('');
-      setTelephone('');
       setMotDePasse('');
       setEditingConducteur(null);
       fetchConducteurs();
@@ -128,7 +123,6 @@ export default function ConducteursPage() {
     setEditingConducteur(conducteur);
     setNom(conducteur.nom);
     setEmail(conducteur.email);
-    setTelephone(conducteur.telephone || '');
     setAgentId(conducteur.agent_id || '');
   };
 
@@ -206,7 +200,6 @@ export default function ConducteursPage() {
                         </div>
                         <p className="text-xs text-dark-on-surface-variant mt-1 font-medium flex flex-col sm:flex-row sm:gap-4">
                           <span>📧 {conducteur.email}</span>
-                          {conducteur.telephone && <span>📞 {conducteur.telephone}</span>}
                         </p>
                       </div>
                     </div>
@@ -325,7 +318,6 @@ export default function ConducteursPage() {
                       setNom('');
                       setEmail('');
                       setAgentId('');
-                      setTelephone('');
                     }}
                     className="flex-1 rounded-xl bg-slate-800 border border-slate-700 py-2.5 text-sm font-semibold text-slate-300 hover:bg-slate-700 transition-all cursor-pointer"
                   >

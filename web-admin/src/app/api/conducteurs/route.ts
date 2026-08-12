@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
 
     // 2. Parse request body
     const body = await req.json();
-    const { nom, email, telephone, motDePasse, agentId } = body;
+    const { nom, email, motDePasse, agentId } = body;
 
     if (!nom || !email || !motDePasse || !agentId) {
       return NextResponse.json({ error: 'Le nom, l\'email, le mot de passe et l\'ID Agent sont requis.' }, { status: 400 });
@@ -64,7 +64,6 @@ export async function POST(req: NextRequest) {
         id: authUser.user.id, // References the Auth user's UUID
         nom,
         email,
-        telephone: telephone || '',
         agent_id: agentId,
         actif: true
       });

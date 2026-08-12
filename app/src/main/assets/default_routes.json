@@ -1,0 +1,34 @@
+[
+  {
+    "id": "default_lille_arras",
+    "title": "Lille - Arras",
+    "stations": [
+      {
+        "id": "station_lille_flandres",
+        "name": "Lille Flandres",
+        "latitude": 50.6364,
+        "longitude": 3.0706,
+        "approachRadius": 300,
+        "arrivalRadius": 80
+      },
+      {
+        "id": "station_douai",
+        "name": "Douai",
+        "latitude": 50.3719,
+        "longitude": 3.0844,
+        "approachRadius": 300,
+        "arrivalRadius": 80
+      },
+      {
+        "id": "station_arras",
+        "name": "Arras",
+        "latitude": 50.2866,
+        "longitude": 2.7810,
+        "approachRadius": 300,
+        "arrivalRadius": 80
+      }
+    ],
+    "createdAt": 1718000000000,
+    "enabled": true
+  }
+]

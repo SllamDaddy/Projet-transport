@@ -80,9 +80,9 @@ export default function TarifsPage() {
       setDescription('');
       setEditingTarif(null);
       fetchTarifs();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving tariff:', error);
-      alert('Une erreur est survenue lors de la sauvegarde.');
+      alert(error?.message || 'Une erreur est survenue lors de la sauvegarde.');
     } finally {
       setSubmitting(false);
     }

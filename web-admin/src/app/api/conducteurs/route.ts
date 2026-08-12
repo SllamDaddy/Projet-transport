@@ -75,8 +75,9 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ success: true, user: authUser.user });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Une erreur interne est survenue.';
     console.error('API Error in /api/conducteurs:', error);
-    return NextResponse.json({ error: error.message || 'Une erreur interne est survenue.' }, { status: 500 });
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

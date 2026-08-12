@@ -110,9 +110,10 @@ export default function ConducteursPage() {
       setMotDePasse('');
       setEditingConducteur(null);
       fetchConducteurs();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error saving driver:', error);
-      alert(error.message || 'Une erreur est survenue lors de la sauvegarde.');
+      const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue lors de la sauvegarde.';
+      alert(errorMessage);
     } finally {
       setSubmitting(false);
     }
@@ -267,19 +268,6 @@ export default function ConducteursPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   className="mt-1 block w-full rounded-xl border border-dark-outline bg-dark-bg/60 px-4 py-2.5 text-dark-on-surface placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
                   placeholder="Ex: jean.dupont@email.com"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-dark-on-surface-variant uppercase tracking-wider">
-                  Téléphone
-                </label>
-                <input
-                  type="tel"
-                  value={telephone}
-                  onChange={(e) => setTelephone(e.target.value)}
-                  className="mt-1 block w-full rounded-xl border border-dark-outline bg-dark-bg/60 px-4 py-2.5 text-dark-on-surface placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
-                  placeholder="Ex: +33 6 12 34 56 78"
                 />
               </div>
 

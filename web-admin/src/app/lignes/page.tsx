@@ -100,7 +100,7 @@ export default function LignesPage() {
   // Click on the map to add or update a marker coordinates
   const handleMapClick = (lat: number, lng: number) => {
     const lastStation = stations[stations.length - 1];
-    if (lastStation.name === '' && lastStation.latitude === 0 && lastStation.longitude === 0) {
+    if (lastStation && lastStation.name === '' && lastStation.latitude === 0 && lastStation.longitude === 0) {
       // If the last station field is empty, populate it
       const updated = [...stations];
       updated[stations.length - 1] = {
@@ -348,17 +348,15 @@ export default function LignesPage() {
                 <div className="space-y-4 max-h-[calc(100vh-420px)] overflow-y-auto pr-1">
                   {stations.map((station, index) => (
                     <div key={index} className="border border-dark-outline/30 bg-dark-bg/40 rounded-xl p-4 space-y-3 relative">
-                      {stations.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveStationField(index)}
-                          className="absolute top-2 right-2 text-slate-500 hover:text-danger-red-dark cursor-pointer"
-                        >
-                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      )}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveStationField(index)}
+                        className="absolute top-2 right-2 text-slate-500 hover:text-danger-red-dark cursor-pointer"
+                      >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
 
                       <div>
                         <input

@@ -313,12 +313,7 @@ export default function ConducteursPage() {
                 </div>
               )}
 
-              {/* Notice explicative */}
-              {!editingConducteur && (
-                <div className="bg-blue-600/5 border border-blue-600/20 rounded-xl p-3.5 text-[11px] text-dark-on-surface-variant leading-relaxed">
-                  💡 <strong>Sécurité :</strong> Le compte est créé avec le rôle <em>conducteur</em>. Il pourra se connecter sur l’application mobile, mais sera automatiquement rejeté s’il tente d’accéder à cette console d’administration.
-                </div>
-              )}
+
 
               <div className="flex gap-2">
                 {editingConducteur && (

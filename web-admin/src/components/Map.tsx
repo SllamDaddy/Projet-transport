@@ -144,11 +144,11 @@ export default function Map({ stations, onMapClick, onMarkerDrag }: MapProps) {
       <div className="absolute bottom-2 left-2 bg-dark-surface/90 backdrop-blur-sm border border-dark-outline rounded-lg px-2.5 py-1.5 text-[10px] text-dark-on-surface-variant font-semibold z-[1000] pointer-events-none space-y-0.5">
         <div className="flex items-center gap-1.5">
           <span className="inline-block w-2.5 h-2.5 rounded-full bg-blue-500/20 border border-blue-500" />
-          <span>Zone d'approche (Annonce vocale)</span>
+          <span>Zone d’approche (Annonce vocale)</span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-700/30 border border-green-600" />
-          <span>Zone d'arrêt (Validation trajet)</span>
+          <span>Zone d’arrêt (Validation trajet)</span>
         </div>
       </div>
     </div>

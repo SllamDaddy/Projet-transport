@@ -62,6 +62,7 @@ export default function LignesPage() {
         .select('*')
         .order('cree_le', { ascending: false });
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const formatted = (data ?? []).map((l: any) => ({
         ...l,
         stations: Array.isArray(l.stations) ? l.stations : []
@@ -333,7 +334,7 @@ export default function LignesPage() {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <label className="block text-xs font-semibold text-dark-on-surface-variant uppercase tracking-wider">
-                    Points d'arrêt
+                    Points d’arrêt
                   </label>
                   <button
                     type="button"
@@ -366,7 +367,7 @@ export default function LignesPage() {
                           value={station.name}
                           onChange={(e) => handleStationChange(index, 'name', e.target.value)}
                           className="block w-full rounded-lg border border-dark-outline bg-dark-surface px-3 py-1.5 text-dark-on-surface placeholder-slate-500 focus:border-blue-500 focus:outline-none text-xs"
-                          placeholder={`Nom de l'arrêt ${index + 1}`}
+                          placeholder={`Nom de l’arrêt ${index + 1}`}
                         />
                       </div>
 

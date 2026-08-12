@@ -29,12 +29,28 @@ interface MapProps {
   onMarkerDrag: (index: number, lat: number, lng: number) => void;
 }
 
-// Subcomponent to handle click events on the map
+// Subcomponent to handle click events on the map, preventing trigger on double-click zoom
 function MapEventsHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
+  const clickTimeoutRef = React.useRef<NodeJS.Timeout | null>(null);
+
   useMapEvents({
     click(e) {
-      onMapClick(e.latlng.lat, e.latlng.lng);
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+        clickTimeoutRef.current = null;
+      } else {
+        clickTimeoutRef.current = setTimeout(() => {
+          onMapClick(e.latlng.lat, e.latlng.lng);
+          clickTimeoutRef.current = null;
+        }, 250);
+      }
     },
+    dblclick() {
+      if (clickTimeoutRef.current) {
+        clearTimeout(clickTimeoutRef.current);
+        clickTimeoutRef.current = null;
+      }
+    }
   });
   return null;
 }

@@ -3,7 +3,11 @@
 ## Projet
 Application Android native — annonces TTS pour trajets TER (Girouette Bus).
 Stack : Kotlin, Jetpack Compose, Hilt, Room, OsmDroid, TTS, Bluetooth SCO.
-Statut : MVP complet (5 écrans : Home, CreateRoute, StationPicker, Tracking, Settings).
+Statut : MVP complet (Login, Home, Tracking, Caisse, Settings).
+L'app est **en lecture seule** pour les lignes/arrêts/annonces vocales : toute la gestion
+(création, modification, suppression) se fait exclusivement depuis le web-admin. L'app se
+synchronise avec Supabase au démarrage (`HomeViewModel.init`) et via le bouton ↻ sur Home
+(`RouteRepository.fetchRoutesFromSupabase()`).
 
 ## Branche Git
 - Toujours travailler et committer sur **`master`**

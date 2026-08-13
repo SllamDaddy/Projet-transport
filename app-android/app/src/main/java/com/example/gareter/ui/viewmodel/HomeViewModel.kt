@@ -108,10 +108,6 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch { repository.saveThemeMode(mode.name) }
     }
 
-    fun deleteRoute(routeId: String) {
-        viewModelScope.launch { repository.deleteRoute(routeId) }
-    }
-
     fun exportRoutes(context: Context) {
         viewModelScope.launch {
             try {

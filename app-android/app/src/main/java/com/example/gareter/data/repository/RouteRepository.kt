@@ -33,7 +33,6 @@ class RouteRepository(private val context: Context) {
         private val COOLDOWNS_KEY = stringPreferencesKey("cooldowns")
         private val AUDIO_DUCKING_KEY = booleanPreferencesKey("audio_ducking")
         private val PREFERRED_DEVICE_ID_KEY = stringPreferencesKey("preferred_device_id")
-        private val CUSTOM_STATIONS_KEY = stringPreferencesKey("custom_stations")
         private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
         private val TARIFFS_KEY = stringPreferencesKey("tariffs_json")
         private val DRIVER_AGENT_KEY = stringPreferencesKey("driver_agent")
@@ -62,22 +61,8 @@ class RouteRepository(private val context: Context) {
         }
     }
 
-    private suspend fun getRoutes(): List<Route> = routesFlow.first()
-
     suspend fun saveRoutes(routes: List<Route>) {
         context.dataStore.edit { it[ROUTES_KEY] = gson.toJson(routes) }
-    }
-
-    suspend fun saveRoute(route: Route) {
-        val current = getRoutes().toMutableList()
-        val idx = current.indexOfFirst { it.id == route.id }
-        if (idx >= 0) current[idx] = route else current.add(route)
-        saveRoutes(current)
-    }
-
-    suspend fun deleteRoute(routeId: String) {
-        val current = getRoutes().filter { it.id != routeId }
-        context.dataStore.edit { it[ROUTES_KEY] = gson.toJson(current) }
     }
 
     val trackingStateFlow: Flow<Boolean> = context.dataStore.data.map { prefs ->
@@ -126,24 +111,6 @@ class RouteRepository(private val context: Context) {
             if (deviceId != null) prefs[PREFERRED_DEVICE_ID_KEY] = deviceId.toString()
             else prefs.remove(PREFERRED_DEVICE_ID_KEY)
         }
-    }
-
-    val customStationsFlow: Flow<List<Station>> = context.dataStore.data.map { prefs ->
-        val json = prefs[CUSTOM_STATIONS_KEY] ?: return@map emptyList()
-        val type = object : TypeToken<List<Station>>() {}.type
-        gson.fromJson<List<Station>>(json, type) ?: emptyList()
-    }
-
-    suspend fun saveCustomStation(station: Station) {
-        val current = customStationsFlow.first().toMutableList()
-        val idx = current.indexOfFirst { it.id == station.id }
-        if (idx >= 0) current[idx] = station else current.add(station)
-        context.dataStore.edit { it[CUSTOM_STATIONS_KEY] = gson.toJson(current) }
-    }
-
-    suspend fun deleteCustomStation(stationId: String) {
-        val current = customStationsFlow.first().filter { it.id != stationId }
-        context.dataStore.edit { it[CUSTOM_STATIONS_KEY] = gson.toJson(current) }
     }
 
     val themeModeFlow: Flow<String> = context.dataStore.data.map { prefs ->

@@ -28,7 +28,21 @@ interface Station {
   longitude: number;
   approachRadius: number;
   arrivalRadius: number;
+  approachMessage: string;
+  arrivalMessage: string;
 }
+
+const NUMERIC_STATION_FIELDS = new Set(['latitude', 'longitude', 'approachRadius', 'arrivalRadius']);
+
+const emptyStation = (): Omit<Station, 'id'> => ({
+  name: '',
+  latitude: 0,
+  longitude: 0,
+  approachRadius: 300,
+  arrivalRadius: 80,
+  approachMessage: '',
+  arrivalMessage: ''
+});
 
 interface Ligne {
   id: string;
@@ -45,9 +59,7 @@ export default function LignesPage() {
 
   // Form states
   const [nom, setNom] = useState('');
-  const [stations, setStations] = useState<Omit<Station, 'id'>[]>([
-    { name: '', latitude: 0, longitude: 0, approachRadius: 300, arrivalRadius: 80 }
-  ]);
+  const [stations, setStations] = useState<Omit<Station, 'id'>[]>([emptyStation()]);
   const [editingLigne, setEditingLigne] = useState<Ligne | null>(null);
 
   useEffect(() => {
@@ -77,10 +89,7 @@ export default function LignesPage() {
   };
 
   const handleAddStationField = () => {
-    setStations([
-      ...stations,
-      { name: '', latitude: 0, longitude: 0, approachRadius: 300, arrivalRadius: 80 }
-    ]);
+    setStations([...stations, emptyStation()]);
   };
 
   const handleRemoveStationField = (index: number) => {
@@ -92,7 +101,7 @@ export default function LignesPage() {
     const updated = [...stations];
     updated[index] = {
       ...updated[index],
-      [field]: field === 'name' ? value : Number(value)
+      [field]: NUMERIC_STATION_FIELDS.has(field) ? Number(value) : value
     };
     setStations(updated);
   };
@@ -115,11 +124,10 @@ export default function LignesPage() {
       setStations([
         ...stations,
         {
+          ...emptyStation(),
           name: `Arrêt ${stations.length + 1}`,
           latitude: Number(lat.toFixed(6)),
-          longitude: Number(lng.toFixed(6)),
-          approachRadius: 300,
-          arrivalRadius: 80
+          longitude: Number(lng.toFixed(6))
         }
       ]);
     }
@@ -199,7 +207,7 @@ export default function LignesPage() {
       }
 
       setNom('');
-      setStations([{ name: '', latitude: 0, longitude: 0, approachRadius: 300, arrivalRadius: 80 }]);
+      setStations([emptyStation()]);
       setEditingLigne(null);
       fetchLignes();
     } catch (error) {
@@ -218,7 +226,11 @@ export default function LignesPage() {
       ligne.stations.map((s) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { id, ...rest } = s;
-        return rest;
+        return {
+          ...rest,
+          approachMessage: rest.approachMessage ?? '',
+          arrivalMessage: rest.arrivalMessage ?? ''
+        };
       })
     );
   };
@@ -417,6 +429,32 @@ export default function LignesPage() {
                           />
                         </div>
                       </div>
+
+                      <div>
+                        <label className="block text-[9px] font-semibold text-dark-on-surface-variant uppercase">
+                          Annonce approche <span className="normal-case font-normal text-slate-500">(variables : {'{nom}'}, {'{distance}'})</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={station.approachMessage}
+                          onChange={(e) => handleStationChange(index, 'approachMessage', e.target.value)}
+                          className="mt-0.5 block w-full rounded-lg border border-dark-outline bg-dark-surface px-3 py-1.5 text-dark-on-surface placeholder-slate-500 focus:border-blue-500 focus:outline-none text-xs"
+                          placeholder="Prochain arrêt : {nom}"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[9px] font-semibold text-dark-on-surface-variant uppercase">
+                          Annonce arrêt <span className="normal-case font-normal text-slate-500">(variable : {'{nom}'})</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={station.arrivalMessage}
+                          onChange={(e) => handleStationChange(index, 'arrivalMessage', e.target.value)}
+                          className="mt-0.5 block w-full rounded-lg border border-dark-outline bg-dark-surface px-3 py-1.5 text-dark-on-surface placeholder-slate-500 focus:border-blue-500 focus:outline-none text-xs"
+                          placeholder="Arrêt : {nom}"
+                        />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -429,7 +467,7 @@ export default function LignesPage() {
                     onClick={() => {
                       setEditingLigne(null);
                       setNom('');
-                      setStations([{ name: '', latitude: 0, longitude: 0, approachRadius: 300, arrivalRadius: 80 }]);
+                      setStations([emptyStation()]);
                     }}
                     className="flex-1 rounded-xl bg-slate-800 border border-slate-700 py-2.5 text-sm font-semibold text-slate-300 hover:bg-slate-700 transition-all cursor-pointer"
                   >

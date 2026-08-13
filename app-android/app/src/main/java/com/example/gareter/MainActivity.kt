@@ -14,14 +14,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.gareter.ui.navigation.NavGraph
 import com.example.gareter.ui.theme.GareTERTheme
 import com.example.gareter.ui.viewmodel.CaisseViewModel
-import com.example.gareter.ui.viewmodel.CreateRouteViewModel
 import com.example.gareter.ui.viewmodel.HomeViewModel
 import org.osmdroid.config.Configuration
 
 class MainActivity : ComponentActivity() {
 
     private val homeViewModel: HomeViewModel by viewModels()
-    private val createRouteViewModel: CreateRouteViewModel by viewModels()
     private val caisseViewModel: CaisseViewModel by viewModels()
 
     private val requestPermissions = registerForActivityResult(
@@ -40,7 +38,6 @@ class MainActivity : ComponentActivity() {
             GareTERTheme(themeMode = themeMode) {
                 NavGraph(
                     homeViewModel = homeViewModel,
-                    createRouteViewModel = createRouteViewModel,
                     caisseViewModel = caisseViewModel,
                 )
             }

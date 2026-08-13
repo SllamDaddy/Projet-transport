@@ -1,8 +1,8 @@
 # Instructions Claude Code — Projet Transport Monorepo
 
 Ce dépôt contient l'écosystème du Projet Transport :
-- `app-android/` : Application mobile Android (Kotlin/Compose) pour le conducteur (TTS & Caisse).
-- `web-admin/` : Portail d'administration web (Next.js/Tailwind) pour la gestion des conducteurs, tarifs et rapports.
+- `app-android/` : Application mobile Android (Kotlin/Compose) pour le conducteur (TTS & Caisse). **Lecture seule** pour les lignes/arrêts/annonces vocales — synchronisée via Supabase, aucune création/édition locale.
+- `web-admin/` : Portail d'administration web (Next.js/Tailwind), **source de vérité unique** pour la gestion des conducteurs, tarifs, rapports, lignes, arrêts et annonces vocales (TTS).
 
 ## Branche Git
 - Toujours travailler et committer sur **`master`**

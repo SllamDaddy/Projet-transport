@@ -31,8 +31,6 @@ import kotlin.math.roundToInt
 
 @Composable
 fun HomeScreen(
-    onCreateRoute: () -> Unit,
-    onEditRoute: (String) -> Unit,
     onGoToSettings: () -> Unit,
     onGoToCaisse: () -> Unit,
     onStartTracking: (Route, RouteDirection) -> Unit,
@@ -96,8 +94,6 @@ fun HomeScreen(
                         trackingBusy = isTracking && !routeIsActive,
                         onStart = { direction -> onStartTracking(route, direction) },
                         onStop = { viewModel.stopTracking() },
-                        onEdit = { onEditRoute(route.id) },
-                        onDelete = { viewModel.deleteRoute(route.id) },
                         onOpenTracking = onGoToTracking,
                     )
                 }
@@ -246,27 +242,9 @@ private fun RouteCard(
     trackingBusy: Boolean,
     onStart: (RouteDirection) -> Unit,
     onStop: () -> Unit,
-    onEdit: () -> Unit,
-    onDelete: () -> Unit,
     onOpenTracking: () -> Unit,
 ) {
-    var showConfirmDelete by remember { mutableStateOf(false) }
     var showDirectionPicker by remember { mutableStateOf(false) }
-
-    if (showConfirmDelete) {
-        AlertDialog(
-            onDismissRequest = { showConfirmDelete = false },
-            title = { Text("Supprimer la ligne ?") },
-            text = { Text("« ${route.title} » sera supprimée définitivement.") },
-            confirmButton = {
-                TextButton(onClick = { onDelete(); showConfirmDelete = false }) {
-                    Text("Supprimer", color = DangerRed)
-                }
-            },
-            dismissButton = { TextButton(onClick = { showConfirmDelete = false }) { Text("Annuler") } },
-            shape = RoundedCornerShape(20.dp),
-        )
-    }
 
     if (showDirectionPicker) {
         AlertDialog(
@@ -403,7 +381,7 @@ private fun EmptyState() {
         }
         Text("Aucune ligne enregistrée", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onBackground)
         Text(
-            "Appuie sur le bouton + pour\ncréer ta première ligne",
+            "Les lignes sont configurées par l'administrateur.\nAppuie sur ↻ pour synchroniser",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

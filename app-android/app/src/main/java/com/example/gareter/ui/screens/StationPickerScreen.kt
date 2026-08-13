@@ -61,6 +61,7 @@ import com.example.gareter.service.LocationService
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
@@ -373,7 +374,15 @@ private fun ManualMapEntry(
                 factory = { ctx ->
                     Configuration.getInstance().userAgentValue = ctx.packageName
                     MapView(ctx).apply {
-                        setTileSource(TileSourceFactory.MAPNIK)
+                        val tileSource = XYTileSource(
+                            "OpenAndroMaps",
+                            1, 19, 256, ".png",
+                            arrayOf("https://a.tile.openandromaps.org/tiles/Elevate/",
+                                    "https://b.tile.openandromaps.org/tiles/Elevate/",
+                                    "https://c.tile.openandromaps.org/tiles/Elevate/"),
+                            "Map data & imagery © OpenStreetMap contributors"
+                        )
+                        setTileSource(tileSource)
                         setMultiTouchControls(true)
                         controller.setZoom(6.0)
                         controller.setCenter(GeoPoint(46.6, 2.3))
@@ -513,7 +522,15 @@ private fun StationMapAndSliders(
                 factory = { ctx ->
                     Configuration.getInstance().userAgentValue = ctx.packageName
                     MapView(ctx).apply {
-                        setTileSource(TileSourceFactory.MAPNIK)
+                        val tileSource = XYTileSource(
+                            "OpenAndroMaps",
+                            1, 19, 256, ".png",
+                            arrayOf("https://a.tile.openandromaps.org/tiles/Elevate/",
+                                    "https://b.tile.openandromaps.org/tiles/Elevate/",
+                                    "https://c.tile.openandromaps.org/tiles/Elevate/"),
+                            "Map data & imagery © OpenStreetMap contributors"
+                        )
+                        setTileSource(tileSource)
                         setMultiTouchControls(true)
                         controller.setZoom(14.0)
                         controller.setCenter(center)

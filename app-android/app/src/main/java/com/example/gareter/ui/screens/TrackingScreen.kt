@@ -43,6 +43,7 @@ import com.example.gareter.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.tileprovider.tilesource.XYTileSource
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
@@ -117,7 +118,15 @@ fun TrackingScreen(
     // MapView instance instantiated once and remembered
     val mapView = remember {
         MapView(context).apply {
-            setTileSource(TileSourceFactory.MAPNIK)
+            val tileSource = XYTileSource(
+                "OpenAndroMaps",
+                1, 19, 256, ".png",
+                arrayOf("https://a.tile.openandromaps.org/tiles/Elevate/",
+                        "https://b.tile.openandromaps.org/tiles/Elevate/",
+                        "https://c.tile.openandromaps.org/tiles/Elevate/"),
+                "Map data & imagery © OpenStreetMap contributors"
+            )
+            setTileSource(tileSource)
             setMultiTouchControls(true)
             minZoomLevel = 5.0
             maxZoomLevel = 19.0

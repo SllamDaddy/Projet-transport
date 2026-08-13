@@ -275,12 +275,12 @@ private fun RouteCard(
             text = { Text("Dans quel sens allez-vous ?") },
             confirmButton = {
                 TextButton(onClick = { onStart(RouteDirection.FORWARD); showDirectionPicker = false }) {
-                    Text("${route.stations.firstOrNull()?.name ?: "Début"} → Fin")
+                    Text("${route.stations.firstOrNull()?.name ?: "Début"} → ${route.stations.lastOrNull()?.name ?: "Fin"}")
                 }
             },
             dismissButton = {
                 TextButton(onClick = { onStart(RouteDirection.BACKWARD); showDirectionPicker = false }) {
-                    Text("Fin → ${route.stations.firstOrNull()?.name ?: "Début"}")
+                    Text("${route.stations.lastOrNull()?.name ?: "Fin"} → ${route.stations.firstOrNull()?.name ?: "Début"}")
                 }
             },
             shape = RoundedCornerShape(20.dp),

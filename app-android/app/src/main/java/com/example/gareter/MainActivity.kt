@@ -33,6 +33,7 @@ class MainActivity : ComponentActivity() {
         Configuration.getInstance().apply {
             load(this@MainActivity, getSharedPreferences("osmdroid", MODE_PRIVATE))
             userAgentValue = "GirouetteBUS/1.0 (madi.douhouchina@gmail.com)"
+            cacheMapTileCount = 500
         }
         requestNeededPermissions()
         setContent {

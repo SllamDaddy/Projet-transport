@@ -89,13 +89,6 @@ class CaisseViewModel(application: Application) : AndroidViewModel(application) 
         }
     }
 
-    fun setTariff(type: TicketType, priceCents: Int) {
-        viewModelScope.launch {
-            val updated = tariffs.value.toMutableMap().also { it[type] = priceCents }
-            routeRepo.saveTariffs(updated)
-        }
-    }
-
     suspend fun getCarnet(carnetId: String): CarnetTicket? = caisseRepo.getCarnet(carnetId)
 
     fun useCarnetUnit(carnet: CarnetTicket) {

@@ -12,6 +12,18 @@ interface Tarif {
   mis_a_jour_le?: string;
 }
 
+// Ces valeurs doivent correspondre exactement à l'enum TicketType de l'app Android
+// (app-android/.../data/model/TicketType.kt) : l'app fait TicketType.valueOf(nom_ticket).
+const TICKET_TYPES = [
+  { value: 'PLEIN_TARIF', label: 'Plein tarif' },
+  { value: 'CARNET', label: 'Carnet 10 trajets' },
+  { value: 'ABONNEMENT_MENSUEL', label: 'Abonnement mensuel' },
+  { value: 'CONTREMARQUE', label: 'Contremarque' },
+] as const;
+
+const ticketLabel = (nomTicket: string) =>
+  TICKET_TYPES.find((t) => t.value === nomTicket)?.label ?? nomTicket;
+
 export default function TarifsPage() {
   const [tarifs, setTarifs] = useState<Tarif[]>([]);
   const [loading, setLoading] = useState(true);
@@ -144,7 +156,7 @@ export default function TarifsPage() {
                   >
                     <div>
                       <div className="flex items-start justify-between gap-2">
-                        <h4 className="font-bold text-dark-on-surface text-base">{tarif.nom_ticket}</h4>
+                        <h4 className="font-bold text-dark-on-surface text-base">{ticketLabel(tarif.nom_ticket)}</h4>
                         <span className="text-lg font-extrabold text-blue-400 bg-blue-600/10 border border-blue-600/30 px-3 py-1 rounded-xl">
                           {tarif.prix.toFixed(2)} €
                         </span>
@@ -186,16 +198,19 @@ export default function TarifsPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <label className="block text-xs font-semibold text-dark-on-surface-variant uppercase tracking-wider">
-                  Nom du ticket
+                  Type de ticket
                 </label>
-                <input
-                  type="text"
+                <select
                   required
                   value={nom}
                   onChange={(e) => setNom(e.target.value)}
-                  className="mt-1 block w-full rounded-xl border border-dark-outline bg-dark-bg/60 px-4 py-2.5 text-dark-on-surface placeholder-slate-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
-                  placeholder="Ex: Ticket Unitaire"
-                />
+                  className="mt-1 block w-full rounded-xl border border-dark-outline bg-dark-bg/60 px-4 py-2.5 text-dark-on-surface focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm"
+                >
+                  <option value="" disabled>Sélectionner un type</option>
+                  {TICKET_TYPES.map((t) => (
+                    <option key={t.value} value={t.value}>{t.label}</option>
+                  ))}
+                </select>
               </div>
 
               <div>

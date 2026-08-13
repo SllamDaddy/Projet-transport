@@ -39,18 +39,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.gareter.data.model.TicketType
 import com.example.gareter.ui.theme.ThemeMode
-import com.example.gareter.ui.viewmodel.CaisseViewModel
 import com.example.gareter.ui.viewmodel.HomeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -58,17 +53,10 @@ import com.example.gareter.ui.viewmodel.HomeViewModel
 fun SettingsScreen(
     onBack: () -> Unit,
     viewModel: HomeViewModel = viewModel(),
-    caisseViewModel: CaisseViewModel = viewModel(),
 ) {
     val context = LocalContext.current
     val audioDucking by viewModel.audioDucking.collectAsStateWithLifecycle()
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
-    val tariffs by caisseViewModel.tariffs.collectAsStateWithLifecycle()
-    val tariffInputs = remember(tariffs) {
-        mutableStateMapOf<TicketType, String>().also { map ->
-            TicketType.entries.forEach { t -> map[t] = "%.2f".format((tariffs[t] ?: t.defaultPriceCents) / 100.0) }
-        }
-    }
 
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()

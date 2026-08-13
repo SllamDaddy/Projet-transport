@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlin.math.roundToInt
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "gare_ter_prefs")
 
@@ -174,7 +175,7 @@ class RouteRepository(private val context: Context) {
 
     private class SupabaseTarif(
         val nom_ticket: String,
-        val prix_cents: Int
+        val prix: Double
     )
 
     suspend fun fetchRoutesFromSupabase(): Result<List<Route>> = withContext(Dispatchers.IO) {
@@ -235,7 +236,7 @@ class RouteRepository(private val context: Context) {
                 rawTarifs.forEach { tarif ->
                     try {
                         val ticketType = TicketType.valueOf(tarif.nom_ticket)
-                        tariffs[ticketType] = tarif.prix_cents
+                        tariffs[ticketType] = (tarif.prix * 100).roundToInt()
                     } catch (e: Exception) {
                         // Skip invalid ticket types
                     }

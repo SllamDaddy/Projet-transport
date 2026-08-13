@@ -30,13 +30,14 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     val syncLoading = _syncLoading.asStateFlow()
 
     init {
-        syncRoutesFromSupabase()
+        syncFromSupabase()
     }
 
-    fun syncRoutesFromSupabase() {
+    fun syncFromSupabase() {
         viewModelScope.launch {
             _syncLoading.value = true
             repository.fetchRoutesFromSupabase()
+            repository.fetchTariffsFromSupabase()
             _syncLoading.value = false
         }
     }

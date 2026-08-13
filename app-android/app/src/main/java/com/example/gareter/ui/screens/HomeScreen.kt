@@ -61,7 +61,7 @@ fun HomeScreen(
                 HomeHeader(
                     onGoToSettings = onGoToSettings,
                     driverAgent = driverAgent ?: "Conducteur",
-                    onSync = { viewModel.syncRoutesFromSupabase() },
+                    onSync = { viewModel.syncFromSupabase() },
                     syncLoading = syncLoading,
                     routeCount = routes.size
                 )

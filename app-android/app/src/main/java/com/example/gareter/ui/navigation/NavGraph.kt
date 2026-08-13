@@ -99,7 +99,6 @@ fun NavGraph(
             SettingsScreen(
                 onBack = { navController.popBackStack() },
                 viewModel = homeViewModel,
-                caisseViewModel = caisseViewModel,
             )
         }
 

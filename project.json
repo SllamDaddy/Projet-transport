@@ -1,0 +1,17 @@
+{
+  "name": "projet-transport",
+  "path": "Projet Transport",
+  "type": "kotlin-android-nextjs",
+  "owner": "Madi",
+  "phase0_5_validated": false,
+  "depends_on_shared": [
+    "AGENTS.md",
+    "CLAUDE.md"
+  ],
+  "dependencies": [],
+  "scripts": {
+    "build": "cd app-android && gradlew.bat :app:assembleDebug && cd ../web-admin && npm run build",
+    "test": "cd app-android && gradlew.bat test",
+    "lint": "cd web-admin && npm run lint"
+  }
+}

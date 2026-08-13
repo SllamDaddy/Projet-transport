@@ -1,7 +1,9 @@
 package com.example.gareter.ui.screens
 
+import android.bluetooth.BluetoothDevice
 import android.location.Location
 import android.view.MotionEvent
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -641,18 +643,26 @@ private fun ReceiptOptionsBottomSheet(
 ) {
     val context = LocalContext.current
     val receiptManager = remember { ReceiptManager(context) }
+    val printerManager = remember { PrinterManager(context) }
     val coroutineScope = rememberCoroutineScope()
 
     var receiptText by remember { mutableStateOf<String?>(null) }
+    var pairedPrinters by remember { mutableStateOf<List<BluetoothDevice>>(emptyList()) }
+    var selectedPrinter by remember { mutableStateOf<BluetoothDevice?>(null) }
+    var isPrinting by remember { mutableStateOf(false) }
+    var showPrinterDropdown by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         coroutineScope.launch {
             receiptText = receiptManager.generateReceiptText(sale, agentNumber, "N/A")
+            pairedPrinters = printerManager.getPairedPrinters()
+            if (pairedPrinters.isNotEmpty()) {
+                selectedPrinter = pairedPrinters.first()
+            }
         }
     }
 
     if (receiptText == null) {
-        // Loading state
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator()
         }
@@ -677,7 +687,6 @@ private fun ReceiptOptionsBottomSheet(
 
             Spacer(Modifier.height(8.dp))
 
-            // SMS
             Button(
                 onClick = {
                     coroutineScope.launch {
@@ -692,7 +701,6 @@ private fun ReceiptOptionsBottomSheet(
                 Text("Envoyer par SMS")
             }
 
-            // Email
             Button(
                 onClick = {
                     coroutineScope.launch {
@@ -707,20 +715,106 @@ private fun ReceiptOptionsBottomSheet(
                 Text("Envoyer par Email")
             }
 
-            // Imprimer
-            Button(
-                onClick = {
-                    // TODO: Intégrer PrinterManager avec impression Bluetooth
-                    onDismiss()
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = Violet500),
-            ) {
-                Icon(Icons.Default.Print, "Imprimer", modifier = Modifier.padding(end = 8.dp))
-                Text("Imprimer le reçu")
+            if (pairedPrinters.isNotEmpty()) {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Button(
+                            onClick = { showPrinterDropdown = !showPrinterDropdown },
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = ButtonDefaults.buttonColors(containerColor = Violet500),
+                        ) {
+                            Icon(Icons.Default.Print, null, modifier = Modifier.padding(end = 8.dp))
+                            Text(selectedPrinter?.name ?: "Sélectionner imprimante")
+                            Spacer(Modifier.weight(1f))
+                            Icon(Icons.Default.ArrowDropDown, null)
+                        }
+
+                        DropdownMenu(
+                            expanded = showPrinterDropdown,
+                            onDismissRequest = { showPrinterDropdown = false },
+                            modifier = Modifier.fillMaxWidth(0.9f),
+                        ) {
+                            pairedPrinters.forEach { printer ->
+                                DropdownMenuItem(
+                                    text = { Text(printer.name ?: "Unknown") },
+                                    onClick = {
+                                        selectedPrinter = printer
+                                        showPrinterDropdown = false
+                                    }
+                                )
+                            }
+                        }
+                    }
+
+                    Button(
+                        onClick = {
+                            if (selectedPrinter != null) {
+                                isPrinting = true
+                                coroutineScope.launch {
+                                    try {
+                                        if (!printerManager.isBluetoothEnabled()) {
+                                            Toast.makeText(context, "Bluetooth désactivé", Toast.LENGTH_SHORT).show()
+                                            isPrinting = false
+                                            return@launch
+                                        }
+
+                                        val connectResult = printerManager.connectToPrinter(selectedPrinter!!)
+                                        if (connectResult.isFailure) {
+                                            Toast.makeText(context, "Erreur de connexion", Toast.LENGTH_SHORT).show()
+                                            isPrinting = false
+                                            return@launch
+                                        }
+
+                                        val socket = connectResult.getOrNull()!!
+                                        val formattedText = printerManager.formatTicketForPrinting(
+                                            type = sale.type.displayName,
+                                            price = sale.priceCents,
+                                            agentNumber = agentNumber,
+                                            lineNumber = "N/A",
+                                            timestamp = sale.soldAt,
+                                            transactionId = sale.id.take(8)
+                                        )
+
+                                        val printResult = printerManager.printText(socket, formattedText)
+                                        printerManager.disconnect(socket)
+
+                                        if (printResult.isSuccess) {
+                                            Toast.makeText(context, "Impression réussie", Toast.LENGTH_SHORT).show()
+                                            onDismiss()
+                                        } else {
+                                            Toast.makeText(context, "Erreur d'impression", Toast.LENGTH_SHORT).show()
+                                        }
+                                    } catch (e: Exception) {
+                                        Toast.makeText(context, "Erreur: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    } finally {
+                                        isPrinting = false
+                                    }
+                                }
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled = !isPrinting && selectedPrinter != null,
+                        colors = ButtonDefaults.buttonColors(containerColor = Violet600),
+                    ) {
+                        if (isPrinting) {
+                            CircularProgressIndicator(modifier = Modifier.size(20.dp), color = Color.White)
+                            Spacer(Modifier.width(8.dp))
+                        }
+                        Text(if (isPrinting) "Impression..." else "Imprimer")
+                    }
+                }
+            } else {
+                Button(
+                    onClick = { /* Pas d'imprimante disponible */ },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = false,
+                    colors = ButtonDefaults.buttonColors(containerColor = Violet500),
+                ) {
+                    Icon(Icons.Default.Print, null, modifier = Modifier.padding(end = 8.dp))
+                    Text("Aucune imprimante appairée")
+                }
             }
 
-            // Fermer
             Button(
                 onClick = onDismiss,
                 modifier = Modifier.fillMaxWidth(),

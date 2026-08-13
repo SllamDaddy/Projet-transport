@@ -1,7 +1,10 @@
 package com.example.gareter.data.db
 
 import androidx.room.*
+import com.example.gareter.data.model.AbonnementPass
+import com.example.gareter.data.model.AbonnementScan
 import com.example.gareter.data.model.CarnetTicket
+import com.example.gareter.data.model.CarnetUsageEvent
 import com.example.gareter.data.model.ServiceSession
 import com.example.gareter.data.model.TicketSale
 import com.example.gareter.data.model.TicketType
@@ -47,6 +50,12 @@ interface CaisseDao {
     @Query("SELECT COUNT(*) FROM ticket_sales WHERE sessionId = :sessionId AND type = :type")
     fun getCountByType(sessionId: String, type: TicketType): Flow<Int>
 
+    @Query("SELECT * FROM ticket_sales WHERE synced = 0 ORDER BY soldAt ASC LIMIT 200")
+    suspend fun getUnsyncedSales(): List<TicketSale>
+
+    @Query("UPDATE ticket_sales SET synced = 1 WHERE id IN (:ids)")
+    suspend fun markSalesSynced(ids: List<String>)
+
     // ── Carnets ─────────────────────────────────────────────────────────────────
 
     @Insert
@@ -57,4 +66,30 @@ interface CaisseDao {
 
     @Query("SELECT * FROM carnet_tickets WHERE id = :carnetId LIMIT 1")
     suspend fun getCarnetById(carnetId: String): CarnetTicket?
+
+    @Insert
+    suspend fun insertCarnetUsageEvent(event: CarnetUsageEvent)
+
+    @Query("SELECT * FROM carnet_usage_events WHERE synced = 0 ORDER BY usedAt ASC LIMIT 200")
+    suspend fun getUnsyncedCarnetUsageEvents(): List<CarnetUsageEvent>
+
+    @Query("UPDATE carnet_usage_events SET synced = 1 WHERE id IN (:ids)")
+    suspend fun markCarnetUsageEventsSynced(ids: List<String>)
+
+    // ── Abonnements ─────────────────────────────────────────────────────────────
+
+    @Insert
+    suspend fun insertAbonnementPass(pass: AbonnementPass)
+
+    @Query("SELECT * FROM abonnement_passes WHERE id = :passId LIMIT 1")
+    suspend fun getAbonnementPassById(passId: String): AbonnementPass?
+
+    @Insert
+    suspend fun insertAbonnementScan(scan: AbonnementScan)
+
+    @Query("SELECT * FROM abonnement_scans WHERE synced = 0 ORDER BY scannedAt ASC LIMIT 200")
+    suspend fun getUnsyncedAbonnementScans(): List<AbonnementScan>
+
+    @Query("UPDATE abonnement_scans SET synced = 1 WHERE id IN (:ids)")
+    suspend fun markAbonnementScansSynced(ids: List<String>)
 }

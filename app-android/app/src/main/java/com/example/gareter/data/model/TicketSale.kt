@@ -15,4 +15,11 @@ data class TicketSale(
     val expiresAt: Long? = null,
     // renseigné uniquement si type == CARNET, référence CarnetTicket.id
     val carnetId: String? = null,
+    // arrêt le plus proche au moment de la vente (null si GPS/trajet indisponible)
+    val stationId: String? = null,
+    val stationName: String? = null,
+    val routeId: String? = null,
+    val routeTitle: String? = null,
+    // true une fois remontée vers Supabase pour les statistiques web-admin
+    val synced: Boolean = false,
 )

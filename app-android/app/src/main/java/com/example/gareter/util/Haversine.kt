@@ -1,5 +1,6 @@
 package com.example.gareter.util
 
+import com.example.gareter.data.model.Station
 import kotlin.math.*
 
 object Haversine {
@@ -12,4 +13,7 @@ object Haversine {
                 cos(Math.toRadians(lat1)) * cos(Math.toRadians(lat2)) * sin(dLon / 2).pow(2)
         return R * 2 * atan2(sqrt(a), sqrt(1 - a))
     }
+
+    fun nearestStation(stations: List<Station>, lat: Double, lon: Double): Station? =
+        stations.minByOrNull { distance(lat, lon, it.latitude, it.longitude) }
 }

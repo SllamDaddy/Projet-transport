@@ -216,7 +216,7 @@ fun CaisseScreen(
                         ) {
                             Icon(Icons.Default.QrCodeScanner, null, modifier = Modifier.size(16.dp))
                             Spacer(Modifier.width(6.dp))
-                            Text("Carnet retour", fontWeight = FontWeight.Medium)
+                            Text("Scanner", fontWeight = FontWeight.Medium)
                         }
 
                         // Annuler dernier

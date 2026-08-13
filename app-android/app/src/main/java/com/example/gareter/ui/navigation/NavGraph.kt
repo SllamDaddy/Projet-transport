@@ -91,7 +91,9 @@ fun NavGraph(
         composable(Dest.TRACKING) {
             TrackingScreen(
                 onBack = { navController.popBackStack() },
-                viewModel = homeViewModel
+                onScanQr = { navController.navigate(Dest.CARNET_SCAN) },
+                viewModel = homeViewModel,
+                caisseViewModel = caisseViewModel,
             )
         }
 

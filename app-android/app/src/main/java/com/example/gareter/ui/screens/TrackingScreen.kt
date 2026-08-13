@@ -51,17 +51,28 @@ import kotlin.math.roundToInt
 @Composable
 fun TrackingScreen(
     onBack: () -> Unit,
+    onScanQr: () -> Unit,
     viewModel: HomeViewModel = viewModel(),
+    caisseViewModel: CaisseViewModel = viewModel(),
 ) {
     val trackingState by viewModel.trackingState.collectAsStateWithLifecycle()
     val activeRoute by viewModel.activeRoute.collectAsStateWithLifecycle()
     val currentLocation by viewModel.currentLocation.collectAsStateWithLifecycle()
     val driverAgent by viewModel.driverAgent.collectAsStateWithLifecycle()
+    val lastSoldSale by caisseViewModel.lastSoldSale.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
     var showVenteBottomSheet by remember { mutableStateOf(false) }
     var showReceiptOptions by remember { mutableStateOf(false) }
     var lastSale by remember { mutableStateOf<com.example.gareter.data.model.TicketSale?>(null) }
+
+    LaunchedEffect(lastSoldSale) {
+        lastSoldSale?.let {
+            lastSale = it
+            showReceiptOptions = true
+            caisseViewModel.clearLastSold()
+        }
+    }
 
     LaunchedEffect(trackingState) {
         if (trackingState is LocationService.ServiceState.Idle) onBack()
@@ -71,14 +82,10 @@ fun TrackingScreen(
     if (showVenteBottomSheet) {
         CaisseVenteBottomSheet(
             onDismiss = { showVenteBottomSheet = false },
-            onSellTicket = { type, price ->
-                // 1. Créer la vente dans Caisse
-                // 2. Afficher options reçu
-                // 3. Imprimer ticket (si imprimante disponible)
-                // lastSale = sale
-                // showReceiptOptions = true
-                // TODO: Intégrer avec CaisseViewModel.sellTicket()
+            onSellTicket = { type, _ ->
+                caisseViewModel.sellTicket(type)
             },
+            viewModel = caisseViewModel,
         )
     }
 
@@ -468,7 +475,7 @@ fun TrackingScreen(
                     }
 
                     Button(
-                        onClick = { /* TODO: Action Scan QR - ouvrir CameraScreen */ },
+                        onClick = onScanQr,
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp),

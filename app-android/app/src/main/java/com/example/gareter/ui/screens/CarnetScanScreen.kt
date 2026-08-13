@@ -18,18 +18,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.gareter.data.model.AbonnementPass
 import com.example.gareter.data.model.CarnetTicket
 import com.example.gareter.ui.theme.*
 import com.example.gareter.ui.viewmodel.CaisseViewModel
-import com.example.gareter.util.TicketGenerator
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 private sealed interface ScanState {
     data object Idle : ScanState
     data object Scanning : ScanState
-    data class Valid(val carnet: CarnetTicket, val unitsLeft: Int) : ScanState
+    data class ValidCarnet(val carnet: CarnetTicket, val unitsLeft: Int) : ScanState
+    data class ValidAbonnement(val pass: AbonnementPass) : ScanState
     data class Invalid(val reason: String) : ScanState
 }
 
@@ -51,9 +55,16 @@ fun CarnetScanScreen(
         scope.launch {
             val carnet = viewModel.getCarnet(raw)
             scanState = when {
-                carnet == null -> ScanState.Invalid("Carnet introuvable.\nQR code non reconnu.")
-                !carnet.isValid -> ScanState.Invalid("Carnet épuisé.\n0 unité restante.")
-                else -> ScanState.Valid(carnet, carnet.remainingUnits)
+                carnet != null && carnet.isValid -> ScanState.ValidCarnet(carnet, carnet.remainingUnits)
+                carnet != null -> ScanState.Invalid("Carnet épuisé.\n0 unité restante.")
+                else -> {
+                    val pass = viewModel.getAbonnementPass(raw)
+                    when {
+                        pass != null && pass.isValid -> ScanState.ValidAbonnement(pass)
+                        pass != null -> ScanState.Invalid("Abonnement expiré.")
+                        else -> ScanState.Invalid("QR code non reconnu.\nAucun carnet ou abonnement associé.")
+                    }
+                }
             }
         }
     }
@@ -61,7 +72,7 @@ fun CarnetScanScreen(
     fun launchScan() {
         scanState = ScanState.Scanning
         val opts = ScanOptions().apply {
-            setPrompt("Scannez le QR du carnet voyageur")
+            setPrompt("Scannez le QR du titre de transport")
             setBeepEnabled(true)
             setOrientationLocked(true)
             setBarcodeImageEnabled(false)
@@ -72,7 +83,7 @@ fun CarnetScanScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Validation carnet retour") },
+                title = { Text("Validation titre de transport") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Retour")
@@ -110,12 +121,12 @@ fun CarnetScanScreen(
                         }
 
                         Text(
-                            "Scanner le carnet",
+                            "Scanner un titre de transport",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
                         )
                         Text(
-                            "Présentez le QR code du carnet du voyageur pour valider un trajet retour.",
+                            "Présentez le QR code du carnet ou de l'abonnement du voyageur pour valider la montée.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = TextAlign.Center,
@@ -136,11 +147,23 @@ fun CarnetScanScreen(
                     }
                 }
 
-                is ScanState.Valid -> {
-                    ValidCard(
+                is ScanState.ValidCarnet -> {
+                    ValidCarnetCard(
                         unitsLeft = state.unitsLeft,
                         onConfirm = {
                             viewModel.useCarnetUnit(state.carnet)
+                            scanState = ScanState.Idle
+                        },
+                        onRescan = { launchScan() },
+                        onBack = onBack,
+                    )
+                }
+
+                is ScanState.ValidAbonnement -> {
+                    ValidAbonnementCard(
+                        pass = state.pass,
+                        onConfirm = {
+                            viewModel.scanAbonnement(state.pass)
                             scanState = ScanState.Idle
                         },
                         onRescan = { launchScan() },
@@ -161,7 +184,7 @@ fun CarnetScanScreen(
 }
 
 @Composable
-private fun ValidCard(
+private fun ValidCarnetCard(
     unitsLeft: Int,
     onConfirm: () -> Unit,
     onRescan: () -> Unit,
@@ -176,6 +199,32 @@ private fun ValidCard(
         subtitleColor = SuccessGreen,
         message = "Confirmez pour utiliser 1 unité (il en restera ${unitsLeft - 1}).",
         primaryLabel = "Valider le trajet",
+        primaryColor = SuccessGreen,
+        onPrimary = onConfirm,
+        secondaryLabel = "Rescanner",
+        onSecondary = onRescan,
+    )
+}
+
+@Composable
+private fun ValidAbonnementCard(
+    pass: AbonnementPass,
+    onConfirm: () -> Unit,
+    onRescan: () -> Unit,
+    onBack: () -> Unit,
+) {
+    val expiryText = remember(pass.expiresAt) {
+        SimpleDateFormat("dd/MM/yyyy", Locale.FRANCE).format(Date(pass.expiresAt))
+    }
+    ResultCard(
+        icon = Icons.Default.CheckCircle,
+        iconTint = SuccessGreen,
+        iconBg = SuccessGreen.copy(alpha = 0.1f),
+        title = "Abonnement valide",
+        subtitle = "Valable jusqu'au $expiryText",
+        subtitleColor = SuccessGreen,
+        message = "Confirmez pour valider la montée du voyageur.",
+        primaryLabel = "Valider la montée",
         primaryColor = SuccessGreen,
         onPrimary = onConfirm,
         secondaryLabel = "Rescanner",

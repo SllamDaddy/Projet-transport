@@ -55,6 +55,15 @@ export default function Sidebar() {
         </svg>
       ),
     },
+    {
+      name: 'Statistiques',
+      href: '/statistiques',
+      icon: (
+        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l4 4 4-11v20M5 19v-4" />
+        </svg>
+      ),
+    },
   ];
 
   return (

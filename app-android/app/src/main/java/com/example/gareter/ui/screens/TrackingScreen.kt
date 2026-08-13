@@ -417,32 +417,6 @@ fun TrackingScreen(
                 }
             }
 
-            // ── Liste des arrêts ──
-            activeRoute?.let { route ->
-                item {
-                    Text(
-                        "Arrêts de la ligne",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
-                    )
-                }
-
-                val nextIdx = route.stations.indexOfFirst { it.name == state?.nextStationName }
-
-                itemsIndexed(route.stations) { idx, station ->
-                    val isPassed = nextIdx >= 0 && idx < nextIdx
-                    val isCurrent = idx == nextIdx
-
-                    StopRow(
-                        name = station.name,
-                        isPassed = isPassed,
-                        isCurrent = isCurrent,
-                        isLast = idx == route.stations.size - 1,
-                    )
-                }
-            }
-
             // ── Boutons Caisse (Vente + Scan) ──
             item {
                 Row(
@@ -490,6 +464,32 @@ fun TrackingScreen(
                         )
                         Text("Scan", style = MaterialTheme.typography.labelLarge)
                     }
+                }
+            }
+
+            // ── Liste des arrêts ──
+            activeRoute?.let { route ->
+                item {
+                    Text(
+                        "Arrêts de la ligne",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp),
+                    )
+                }
+
+                val nextIdx = route.stations.indexOfFirst { it.name == state?.nextStationName }
+
+                itemsIndexed(route.stations) { idx, station ->
+                    val isPassed = nextIdx >= 0 && idx < nextIdx
+                    val isCurrent = idx == nextIdx
+
+                    StopRow(
+                        name = station.name,
+                        isPassed = isPassed,
+                        isCurrent = isCurrent,
+                        isLast = idx == route.stations.size - 1,
+                    )
                 }
             }
         }

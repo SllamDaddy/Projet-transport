@@ -20,7 +20,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.example.gareter.data.model.Station
 import com.example.gareter.ui.viewmodel.CreateRouteViewModel
 import kotlinx.coroutines.delay
-import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -176,7 +175,6 @@ fun StationEditScreen(
                 ) {
                     AndroidView(
                         factory = { ctx ->
-                            Configuration.getInstance().userAgentValue = ctx.packageName
                             MapView(ctx).apply {
                                 setTileSource(TileSourceFactory.MAPNIK)
                                 setMultiTouchControls(true)

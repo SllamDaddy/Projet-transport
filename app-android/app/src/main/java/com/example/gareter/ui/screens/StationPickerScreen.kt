@@ -58,7 +58,6 @@ import android.graphics.Color
 import android.location.Location
 import android.view.MotionEvent
 import com.example.gareter.service.LocationService
-import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
@@ -371,7 +370,6 @@ private fun ManualMapEntry(
         Box(modifier = Modifier.fillMaxWidth().height(280.dp).clipToBounds()) {
             AndroidView(
                 factory = { ctx ->
-                    Configuration.getInstance().userAgentValue = ctx.packageName
                     MapView(ctx).apply {
                         setTileSource(TileSourceFactory.MAPNIK)
                         setMultiTouchControls(true)
@@ -511,7 +509,6 @@ private fun StationMapAndSliders(
             val center = GeoPoint(lat, lon)
             AndroidView(
                 factory = { ctx ->
-                    Configuration.getInstance().userAgentValue = ctx.packageName
                     MapView(ctx).apply {
                         setTileSource(TileSourceFactory.MAPNIK)
                         setMultiTouchControls(true)

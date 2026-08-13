@@ -39,7 +39,6 @@ import com.example.gareter.ui.theme.*
 import com.example.gareter.ui.viewmodel.CaisseViewModel
 import com.example.gareter.ui.viewmodel.HomeViewModel
 import kotlinx.coroutines.launch
-import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -203,7 +202,6 @@ fun TrackingScreen(
             AndroidView(
                 modifier = Modifier.fillMaxSize(),
                 factory = {
-                    Configuration.getInstance().userAgentValue = context.packageName
                     mapView.apply {
                         setOnTouchListener { v, event ->
                             when (event.action) {
